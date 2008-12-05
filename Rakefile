@@ -1,6 +1,7 @@
 require 'rubygems'
 
 require 'rake/clean'
+require 'spec'
 require 'spec/rake/spectask'
 require 'spec/rake/verify_rcov'
 
