@@ -14,8 +14,8 @@ class Queued
       Thread.start( socket.accept ) do | s |
         command = s.gets.chomp
         case command
-        when /dispatch/
-          dispatch s
+        when /dispatch (\d+\.\d+) (\d+\.\d+)/
+          dispatch s, $1.to_f, $2.to_f
         when /quit/
           exit 0
         end
@@ -29,7 +29,7 @@ class Queued
   ################################################################################
 
 
-  def dispatch socket
+  def dispatch socket, coord1, coord2
     ok socket
   end
 

@@ -41,12 +41,12 @@ describe Queued do
     describe 'and dispatch command arrived' do
       before :each do
         @queued = Queued.new
-        @client.stubs( :gets ).returns( 'dispatch' )
+        @client.stubs( :gets ).returns( 'dispatch 123.456 987.654' )
       end
 
 
       it 'should dispatch a job' do
-        @queued.expects( :dispatch ).with( @client ).once
+        @queued.expects( :dispatch ).with( @client, 123.456, 987.654 ).once
         @queued.start
       end
 
