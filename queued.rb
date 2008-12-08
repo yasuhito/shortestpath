@@ -11,15 +11,15 @@ class Queued
     socket = open_socket
 
     Kernel.loop do
-      Thread.start( socket.accept ) do | s |
-        command = s.gets.chomp
+      Thread.start( socket.accept ) do | client |
+        command = client.gets.chomp
         case command
         when /dispatch (\d+\.\d+) (\d+\.\d+)/
-          dispatch s, $1.to_f, $2.to_f
+          dispatch client, $1.to_f, $2.to_f
         when /quit/
           exit 0
         else # FAILED
-          failed s
+          failed client
         end
       end
     end
@@ -31,13 +31,13 @@ class Queued
   ################################################################################
 
 
-  def dispatch socket, coord1, coord2
-    ok socket
+  def dispatch client, coord1, coord2
+    ok client
   end
 
 
-  def ok socket
-    socket.puts 'OK'
+  def ok client
+    client.puts 'OK'
   end
 
 
