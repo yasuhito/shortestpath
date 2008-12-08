@@ -58,6 +58,10 @@ describe Queued do
 
       it "should return 'OK' string if job succeeded" do
         @client.expects( :puts ).with( 'OK' ).once
+        dummy_job = 'DUMMY JOB'
+        Job.expects( :new ).with( 123.456, 987.654 ).returns( dummy_job )
+        dummy_job.expects( :run ).once.returns( true )
+
         @queued.start
       end
     end

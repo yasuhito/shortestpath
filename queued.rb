@@ -32,6 +32,11 @@ class Queued
 
 
   def dispatch client, coord1, coord2
+    job = Job.new( coord1, coord2 )
+    begin
+      job.run
+      # TODO: rescue and send 'FAILED'
+    end
     ok client
   end
 
