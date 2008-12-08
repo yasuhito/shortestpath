@@ -18,6 +18,8 @@ class Queued
           dispatch s, $1.to_f, $2.to_f
         when /quit/
           exit 0
+        else # FAILED
+          failed s
         end
       end
     end
@@ -36,6 +38,11 @@ class Queued
 
   def ok socket
     socket.puts 'OK'
+  end
+
+
+  def failed client
+    client.puts 'FAILED'
   end
 
 

@@ -38,6 +38,11 @@ describe Queued do
     end
 
 
+    ################################################################################
+    # DISPATCH Command
+    ################################################################################
+
+
     describe 'and dispatch command arrived' do
       before :each do
         @queued = Queued.new
@@ -51,7 +56,7 @@ describe Queued do
       end
 
 
-      it "should send 'OK' if job succeeded" do
+      it "should return 'OK' string if job succeeded" do
         @client.expects( :puts ).with( 'OK' ).once
         @queued.start
       end
@@ -65,6 +70,21 @@ describe Queued do
       lambda do
         queued.start
       end.should raise_error( SystemExit )
+    end
+
+
+    ################################################################################
+    # UNKNOWN Command
+    ################################################################################
+
+
+    describe 'and unknown command arrived' do
+      it "should return 'FAILED' string" do
+        queued = Queued.new
+        @client.stubs( :gets ).returns( 'UNKNOWN COMMAND' )
+        @client.expects( :puts ).with( 'FAILED' ).once
+        queued.start
+      end
     end
   end
 end
