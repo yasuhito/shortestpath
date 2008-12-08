@@ -1,3 +1,4 @@
 --exclude "/var/lib/gems"
+--exclude "popen3*"
 --gcc
 
