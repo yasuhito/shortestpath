@@ -15,7 +15,7 @@ class Queued
         command = s.gets.chomp
         case command
         when /dispatch/
-          dispatch
+          dispatch s
         when /quit/
           exit 0
         end
@@ -27,6 +27,16 @@ class Queued
   ################################################################################
   private
   ################################################################################
+
+
+  def dispatch socket
+    ok socket
+  end
+
+
+  def ok socket
+    socket.puts 'OK'
+  end
 
 
   def open_socket

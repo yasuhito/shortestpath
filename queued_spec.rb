@@ -38,12 +38,23 @@ describe Queued do
     end
 
 
-    it "should dispatch a job when 'dispatch' command arrived" do
-      @client.expects( :gets ).returns( 'dispatch' )
+    describe 'and dispatch command arrived' do
+      before :each do
+        @queued = Queued.new
+        @client.stubs( :gets ).returns( 'dispatch' )
+      end
 
-      queued = Queued.new
-      queued.expects( :dispatch ).once
-      queued.start
+
+      it 'should dispatch a job' do
+        @queued.expects( :dispatch ).with( @client ).once
+        @queued.start
+      end
+
+
+      it "should send 'OK' if job succeeded" do
+        @client.expects( :puts ).with( 'OK' ).once
+        @queued.start
+      end
     end
 
 
