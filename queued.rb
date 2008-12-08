@@ -35,9 +35,10 @@ class Queued
     job = Job.new( coord1, coord2 )
     begin
       job.run
-      # TODO: rescue and send 'FAILED'
+      ok client
+    rescue
+      failed client
     end
-    ok client
   end
 
 

@@ -58,9 +58,21 @@ describe Queued do
 
       it "should return 'OK' string if job succeeded" do
         @client.expects( :puts ).with( 'OK' ).once
+
         dummy_job = 'DUMMY JOB'
-        Job.expects( :new ).with( 123.456, 987.654 ).returns( dummy_job )
-        dummy_job.expects( :run ).once.returns( true )
+        Job.stubs( :new ).with( 123.456, 987.654 ).returns( dummy_job )
+        dummy_job.stubs( :run ).returns( true )
+
+        @queued.start
+      end
+
+
+      it "should return 'FAILED' string if job failed" do
+        @client.expects( :puts ).with( 'FAILED' ).once
+
+        dummy_job = 'DUMMY JOB'
+        Job.stubs( :new ).with( 123.456, 987.654 ).returns( dummy_job )
+        dummy_job.stubs( :run ).raises( 'SP FAILED' )
 
         @queued.start
       end
