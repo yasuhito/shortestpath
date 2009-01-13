@@ -21,6 +21,8 @@ class Queued
         
         case command
         when /dispatch (\S+) (\d+) (\d+) (.+)/
+          log "DISPATCH COMMAND"
+
           graph = $1
           source = []
           destination = []
