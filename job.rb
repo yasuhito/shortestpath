@@ -18,18 +18,16 @@ class Job
 
 
   def source_ss
-    lines = @source.collect do | each |
+    @source.collect do | each |
       "s #{ each }"
     end
-    lines.join( "\n" )
   end
 
 
   def destination_ss
-    lines = @destination.collect do | each |
+    @destination.collect do | each |
       "d #{ each }"
     end
-    lines.join( "\n" )
   end
 
 
@@ -38,9 +36,9 @@ class Job
     t.puts <<-SS
 p aux sp ss #{ source_ss.size } #{ destination_ss.size }
 c
-#{ source_ss }
+#{ source_ss.join( "\n" ) }
 c
-#{ destination_ss }
+#{ destination_ss.join( "\n" ) }
 SS
     t.close
     t.path
