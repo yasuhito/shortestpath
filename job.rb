@@ -36,7 +36,7 @@ class Job
   def query_file
     t = Tempfile.new( 'sp' )
     t.puts <<-SS
-p aux sp ss 1 10
+p aux sp ss #{ source_ss.size } #{ destination_ss.size }
 c
 #{ source_ss }
 c
