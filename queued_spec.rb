@@ -11,7 +11,7 @@ describe Queued do
       dummy_log.expects( :flush ).at_least_once
       File.expects( :open ).with( '/tmp/queued.log', 'w' ).once.returns( dummy_log )
 
-      TCPServer.stubs( :open ).with( 78383 ).raises( 'SOCKET OPEN ERROR' )
+      TCPServer.stubs( :open ).with( 7838 ).raises( 'SOCKET OPEN ERROR' )
 
       queued = Queued.new
       lambda do
@@ -34,7 +34,7 @@ describe Queued do
       socket.stubs( :accept ).returns( @client )
 
       Kernel.stubs( :loop ).yields
-      TCPServer.stubs( :open ).with( 78383 ).returns( socket )
+      TCPServer.stubs( :open ).with( 7838 ).returns( socket )
       Thread.stubs( :start ).with( @client ).yields( @client )
     end
 

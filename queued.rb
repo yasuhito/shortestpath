@@ -3,7 +3,7 @@ require 'pshell'
 
 
 class Queued
-  PORT = 78383
+  PORT = 7838
 
 
   def initialize
@@ -17,6 +17,8 @@ class Queued
     Kernel.loop do
       Thread.start( socket.accept ) do | client |
         command = client.gets.chomp
+        log command
+        
         case command
         when /dispatch (\S+) (\d+) (\d+) (.+)/
           graph = $1
