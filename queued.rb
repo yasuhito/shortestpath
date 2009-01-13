@@ -1,3 +1,4 @@
+require 'job'
 require 'popen3'
 require 'pshell'
 
