@@ -9,8 +9,8 @@ class Job
   end
 
   
-   def command
-    "sp.heap #{ @graph } #{ query_file } /tmp/sp.out-p"
+  def command
+    "/home/yasuhito/project/sp/spsolve081229/sp.heap #{ @graph } #{ query_file } /tmp/sp.out-p"
   end
 
 
