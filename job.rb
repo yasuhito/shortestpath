@@ -6,15 +6,36 @@ class Job
     @source = source
     @destination = destination
     @graph = graph
+    @ss = make_query_file
   end
 
   
   def command
-    "/home/yasuhito/project/sp/spsolve081229/sp.heap #{ @graph } #{ query_file } /tmp/sp.out-p"
+    "/home/yasuhito/project/sp/spsolve081229/sp.heap #{ @graph } #{ @ss } #{ outp }"
+  end
+
+
+  def merge_command
+    "/home/yasuhito/project/sp/tools081229/merge_ssout #{ @graph } #{ graph_co } #{ @ss } #{ outp } #{ eps }"
   end
 
 
   private
+
+
+  def eps
+    @ss + ".eps"
+  end
+
+
+  def outp
+    @ss + ".out-p"
+  end
+
+
+  def graph_co
+    File.join( File.dirname( @graph ), File.basename( @graph, ".*" )[ 0..-3 ] ) + '.m-co'
+  end
 
 
   def source_ss
@@ -31,7 +52,7 @@ class Job
   end
 
 
-  def query_file
+  def make_query_file
     t = Tempfile.new( 'sp' )
     t.puts <<-SS
 p aux sp ss #{ source_ss.size } #{ destination_ss.size }

@@ -67,7 +67,7 @@ class Queued
         failed client
       end
  
-      shell.exec job.command
+      shell.exec [ job.command, job.merge_command ].join( ';' )
     end
   end
 

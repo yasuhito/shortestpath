@@ -71,6 +71,7 @@ describe Queued do
 
         dummy_job = 'DUMMY JOB'
         dummy_job.stubs( :command )
+        dummy_job.stubs( :merge_command )
         Job.stubs( :new ).with( 'USA-t.m-gr', [ 957498 ],
                                 [ 957498, 19200797, 13006257, 4314559, 17261435, 8077810, 3048748, 21869636, 13446936, 18549540 ] ).returns( dummy_job )
 
@@ -91,6 +92,7 @@ describe Queued do
 
         dummy_job = 'DUMMY JOB'
         dummy_job.stubs( :command )
+        dummy_job.stubs( :merge_command )
         Job.stubs( :new ).with( 'USA-t.m-gr', [ 957498 ],
                                 [ 957498, 19200797, 13006257, 4314559, 17261435, 8077810, 3048748, 21869636, 13446936, 18549540 ] ).returns( dummy_job )
 
