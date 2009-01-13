@@ -1,3 +1,4 @@
+require 'job'
 require 'queued'
 require 'spec_helper'
 
@@ -46,36 +47,55 @@ describe Queued do
     describe 'and dispatch command arrived' do
       before :each do
         @queued = Queued.new
-        @client.stubs( :gets ).returns( 'dispatch 123.456 987.654' )
+        @client.stubs( :gets ).returns( 'dispatch USA-t.m-gr 1 10 957498 957498 19200797 13006257 4314559 17261435 8077810 3048748 21869636 13446936 18549540' )
       end
 
 
       it 'should dispatch a job' do
-        @queued.expects( :dispatch ).with( @client, 123.456, 987.654 ).once
+        @queued.expects( :dispatch ).with( @client, 'USA-t.m-gr',
+                                           [ 957498 ], [ 957498, 19200797, 13006257, 4314559, 17261435, 8077810, 3048748, 21869636, 13446936, 18549540 ] ).once
         @queued.start
       end
 
 
       it "should return 'OK' string if job succeeded" do
+        shell = 'SHELL'
+        Popen3::Shell.stubs( :open ).yields( shell )
+        shell.stubs( :on_stdout )
+        shell.stubs( :on_stderr )
+        shell.stubs( :on_success ).yields
+        shell.stubs( :on_failure )
+        shell.stubs( :exec )
+
         @client.expects( :puts ).with( 'OK' ).once
 
         dummy_job = 'DUMMY JOB'
-        Job.stubs( :new ).with( 123.456, 987.654 ).returns( dummy_job )
-        dummy_job.stubs( :run ).returns( true )
+        dummy_job.stubs( :command )
+        Job.stubs( :new ).with( 'USA-t.m-gr', [ 957498 ],
+                                [ 957498, 19200797, 13006257, 4314559, 17261435, 8077810, 3048748, 21869636, 13446936, 18549540 ] ).returns( dummy_job )
 
         @queued.start
       end
 
 
-      it "should return 'FAILED' string if job failed" do
+     it "should return 'FAILED' string if job failed" do
+        shell = 'SHELL'
+        Popen3::Shell.stubs( :open ).yields( shell )
+        shell.stubs( :on_stdout )
+        shell.stubs( :on_stderr )
+        shell.stubs( :on_success )
+        shell.stubs( :on_failure ).yields
+        shell.stubs( :exec )
+
         @client.expects( :puts ).with( 'FAILED' ).once
 
         dummy_job = 'DUMMY JOB'
-        Job.stubs( :new ).with( 123.456, 987.654 ).returns( dummy_job )
-        dummy_job.stubs( :run ).raises( 'SP FAILED' )
+        dummy_job.stubs( :command )
+        Job.stubs( :new ).with( 'USA-t.m-gr', [ 957498 ],
+                                [ 957498, 19200797, 13006257, 4314559, 17261435, 8077810, 3048748, 21869636, 13446936, 18549540 ] ).returns( dummy_job )
 
         @queued.start
-      end
+     end
     end
 
 

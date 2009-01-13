@@ -1,3 +1,7 @@
+require 'popen3'
+require 'pshell'
+
+
 class Queued
   PORT = 78383
 
@@ -14,8 +18,19 @@ class Queued
       Thread.start( socket.accept ) do | client |
         command = client.gets.chomp
         case command
-        when /dispatch (\d+\.\d+) (\d+\.\d+)/
-          dispatch client, $1.to_f, $2.to_f
+        when /dispatch (\S+) (\d+) (\d+) (.+)/
+          graph = $1
+          source = []
+          destination = []
+
+          points = $4.split( ' ' )
+          $2.to_i.times do
+            source << points.shift.to_i
+          end
+          $3.to_i.times do
+            destination << points.shift.to_i
+          end
+          dispatch client, graph, source, destination
         when /quit/
           exit 0
         else # FAILED
@@ -31,13 +46,23 @@ class Queued
   ################################################################################
 
 
-  def dispatch client, coord1, coord2
-    job = Job.new( coord1, coord2 )
-    begin
-      job.run
-      ok client
-    rescue
-      failed client
+  def dispatch client, graph, source, destination
+    job = Job.new( graph, source, destination )
+    Popen3::Shell.open do | shell |
+      shell.on_stdout do | line |
+        # client.puts line
+      end
+      shell.on_stderr do | line |
+        # log "WARN [#{ fits }]: #{ line }"
+      end
+      shell.on_success do
+        ok client
+      end
+      shell.on_failure do
+        failed client
+      end
+ 
+      shell.exec job.command
     end
   end
 

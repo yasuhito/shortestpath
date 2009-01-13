@@ -1,3 +1,5 @@
 --exclude "/var/lib/gems"
+--exclude "pshell.rb"
+--exclude "popen3.rb"
 --gcc
 
