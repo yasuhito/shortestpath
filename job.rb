@@ -62,6 +62,9 @@ c
 #{ destination_ss.join( "\n" ) }
 SS
     t.close
-    t.path
+    sspath = t.path + '.ss'
+
+    File.rename t.path, sspath
+    sspath
   end
 end
