@@ -1,5 +1,6 @@
 require 'rubygems'
 
+require 'queued'
 require 'rake/clean'
 require 'spec'
 require 'spec/rake/spectask'
@@ -22,6 +23,12 @@ Spec::Rake::SpecTask.new do | t |
       l.chomp.split ' '
     end.flatten
   end
+end
+
+
+task :start do
+  q = Queued.new
+  q.start
 end
 
 
