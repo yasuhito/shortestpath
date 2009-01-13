@@ -6,30 +6,51 @@ class Job
     @source = source
     @destination = destination
     @graph = graph
-    @ss = make_query_file
+    validate
   end
 
   
-  def command
-    "/home/yasuhito/project/sp/spsolve081229/sp.heap #{ @graph } #{ @ss } #{ outp }"
+  def sp_command
+    "/home/yasuhito/project/sp/spsolve081229/sp.heap #{ @graph } #{ ss } #{ outp }"
   end
 
 
   def merge_command
-    "/home/yasuhito/project/sp/tools081229/merge_ssout #{ @graph } #{ graph_co } #{ @ss } #{ outp } #{ eps }"
+    "/home/yasuhito/project/sp/tools081229/merge_ssout #{ @graph } #{ graph_co } #{ ss } #{ outp } #{ eps }"
   end
 
 
   private
 
 
+  def ss
+    @ss || make_query_file
+  end
+
+
+  def validate
+    unless /\.m\-gr$/=~ @graph
+      raise 'graph file name should have .m-gr suffix'
+    end
+    unless FileTest.exist?( @graph )
+      raise "graph file #{ @graph } does not exist!"
+    end
+    if @source.include?( nil )
+      raise "invalid query #{ @source.inspect }"
+    end
+    if @destination.include?( nil )
+      raise "invalid query #{ @destination.inspect }"
+    end
+  end
+
+
   def eps
-    @ss + ".eps"
+    @tmp_path + '.eps'
   end
 
 
   def outp
-    @ss + ".out-p"
+    @tmp_path + '.out-p'
   end
 
 
@@ -62,6 +83,8 @@ c
 #{ destination_ss.join( "\n" ) }
 SS
     t.close
+
+    @tmp_path = t.path
     sspath = t.path + '.ss'
 
     File.rename t.path, sspath
