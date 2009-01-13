@@ -66,8 +66,10 @@ class Queued
       shell.on_failure do
         failed client
       end
- 
-      shell.exec [ job.command, job.merge_command ].join( ';' )
+
+      command = [ job.command, job.merge_command ].join( ';' )
+      log command
+      shell.exec command
     end
   end
 
