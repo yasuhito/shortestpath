@@ -67,7 +67,7 @@ class Queued
         failed client
       end
 
-      command = [ job.sp_command, job.merge_command ].join( ';' )
+      command = [ job.sp_command, job.merge_command, job.convert_command ].join( ';' )
       log command
       shell.exec command
     end

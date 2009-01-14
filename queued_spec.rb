@@ -71,6 +71,7 @@ describe Queued do
         dummy_job = 'DUMMY JOB'
         dummy_job.stubs( :sp_command )
         dummy_job.stubs( :merge_command )
+        dummy_job.stubs( :convert_command )
         Job.stubs( :new ).with( 'USA-t.m-gr', [ 957498 ], [ 957498, 19200797 ] ).returns( dummy_job )
 
         @queued.start
@@ -91,6 +92,7 @@ describe Queued do
         dummy_job = 'DUMMY JOB'
         dummy_job.stubs( :sp_command )
         dummy_job.stubs( :merge_command )
+        dummy_job.stubs( :convert_command )
         Job.stubs( :new ).with( 'USA-t.m-gr', [ 957498 ], [ 957498, 19200797 ] ).returns( dummy_job )
 
         @queued.start
@@ -111,6 +113,7 @@ describe Queued do
         dummy_job = 'DUMMY JOB'
         dummy_job.stubs( :sp_command )
         dummy_job.stubs( :merge_command )
+        dummy_job.stubs( :convert_command )
         Job.stubs( :new ).with( 'USA-t.m-gr', [ 957498 ], [ 957498, 19200797 ] ).returns( dummy_job )
 
         @queued.start
@@ -131,6 +134,7 @@ describe Queued do
         dummy_job = 'DUMMY JOB'
         dummy_job.stubs( :sp_command )
         dummy_job.stubs( :merge_command )
+        dummy_job.stubs( :convert_command )
         Job.stubs( :new ).with( 'USA-t.m-gr', [ 957498 ], [ 957498, 19200797 ] ).returns( dummy_job )
 
         @queued.start
