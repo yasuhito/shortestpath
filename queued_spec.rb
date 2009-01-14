@@ -77,6 +77,26 @@ describe Queued do
       end
 
 
+      it 'should redirect stderr to client' do
+        shell = 'SHELL'
+        Popen3::Shell.stubs( :open ).yields( shell )
+        shell.stubs( :on_stdout )
+        shell.stubs( :on_stderr ).yields( 'STDERR' )
+        shell.stubs( :on_success )
+        shell.stubs( :on_failure )
+        shell.stubs( :exec )
+
+        @client.expects( :puts ).with( 'STDERR' ).once
+
+        dummy_job = 'DUMMY JOB'
+        dummy_job.stubs( :sp_command )
+        dummy_job.stubs( :merge_command )
+        Job.stubs( :new ).with( 'USA-t.m-gr', [ 957498 ], [ 957498, 19200797 ] ).returns( dummy_job )
+
+        @queued.start
+      end
+
+
       it "should return 'OK' string if job succeeded" do
         shell = 'SHELL'
         Popen3::Shell.stubs( :open ).yields( shell )

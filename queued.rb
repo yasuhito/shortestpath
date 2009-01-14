@@ -58,7 +58,7 @@ class Queued
         client.puts line
       end
       shell.on_stderr do | line |
-        # log "WARN [#{ fits }]: #{ line }"
+        client.puts line
       end
       shell.on_success do
         ok client
