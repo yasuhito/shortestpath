@@ -55,7 +55,7 @@ class Queued
     job = Job.new( graph, source, destination )
     Popen3::Shell.open do | shell |
       shell.on_stdout do | line |
-        # client.puts line
+        client.puts line
       end
       shell.on_stderr do | line |
         # log "WARN [#{ fits }]: #{ line }"
