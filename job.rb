@@ -24,7 +24,7 @@ class Job
 
 
   def ss
-    @ss || make_query_file
+    @ss ||= make_query_file
   end
 
 
