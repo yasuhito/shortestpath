@@ -27,7 +27,10 @@ end
 
 
 task :start do
-  q = Queued.new
+  node_list = IO.readlines( 'node_list.txt' ).collect do | each |
+    each.chomp
+  end
+  q = Queued.new( node_list )
   q.start
 end
 
