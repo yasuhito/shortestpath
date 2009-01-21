@@ -72,7 +72,16 @@ class Queued
         failed client
       end
 
-      command = CommandBuilder.build( @node_list.get_node, graph, source, destination )
+      begin
+        command = CommandBuilder.build( @node_list.get_node, graph, source, destination )
+      rescue
+        log_and_msg $!.to_s
+        $!.backtrace.each do | each |
+          log_and_msg each
+        end
+        return
+      end
+
       log_and_msg command
       shell.exec command
     end

@@ -41,6 +41,15 @@ describe Queued do
     end
 
 
+    it 'should rescue if invalid dipatch command arrived' do
+      @client.stubs( :gets ).returns( 'dispatch NO_SUCH_GRAPH 1 2 957498 957498 19200797' )
+
+      lambda do
+        @queued.start
+      end.should_not raise_error
+    end
+
+
     ################################################################################
     # DISPATCH Command
     ################################################################################
