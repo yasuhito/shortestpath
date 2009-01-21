@@ -75,7 +75,7 @@ class Queued
       begin
         command = CommandBuilder.build( @node_list.get_node, graph, source, destination )
       rescue
-        log_and_msg $!.to_s
+        failed client, $!.to_s
         $!.backtrace.each do | each |
           log_and_msg each
         end
@@ -93,8 +93,10 @@ class Queued
   end
 
 
-  def failed client
-    client.puts 'FAILED'
+  def failed client, message = nil
+    msg = message ? "FAILED #{ message }" : 'FAILED'
+    log_and_msg msg
+    client.puts msg
   end
 
 
