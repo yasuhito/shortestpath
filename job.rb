@@ -16,13 +16,13 @@ class Job
   end
 
 
-  def convert_command
-    "convert -transparent white #{ eps } #{ png }"
+  def ss
+    @ss
   end
 
 
-  def ss
-    @ss
+  def convert_command
+    "convert -transparent white #{ eps } #{ png } && echo #{ png }"
   end
 
 
