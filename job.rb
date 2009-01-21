@@ -22,7 +22,7 @@ class Job
 
 
   def convert_command
-    "convert -transparent white #{ eps } #{ png } && echo #{ png }"
+    "convert -transparent white #{ eps } #{ png } && echo 'OK #{ png }'"
   end
 
 
