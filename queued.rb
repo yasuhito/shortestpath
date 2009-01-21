@@ -21,6 +21,7 @@ class Queued
 
   def start
     socket = open_socket
+    log_and_msg "Queued started on port #{ PORT }"
 
     Kernel.loop do
       Thread.start( socket.accept ) do | client |
@@ -101,6 +102,12 @@ class Queued
       exit -1
     end
     socket
+  end
+
+
+  def log_and_msg message
+    log message
+    STDOUT.puts message
   end
 
 

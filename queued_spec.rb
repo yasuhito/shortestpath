@@ -8,6 +8,8 @@ describe Queued do
   before :each do
     @queued = Queued.new
 
+    STDOUT.stubs :puts
+
     dummy_log = mock( 'LOG' ) do
       stubs :puts
       stubs :flush
