@@ -61,17 +61,14 @@ class Queued
 
   def dispatch client, graph, source, destination
     Popen3::Shell.open do | shell |
-      png = nil
-
       shell.on_stdout do | line |
-        png = $1 if /\AOK (.+)/=~ line
         client.puts line
       end
       shell.on_stderr do | line |
         client.puts line
       end
       shell.on_success do
-        ok client, png
+        ok client
       end
       shell.on_failure do
         failed client
