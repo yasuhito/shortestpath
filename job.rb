@@ -27,12 +27,12 @@ class Job
 
 
   def sp_command
-    "sp.heap #{ @graph } #{ ss } #{ outp }"
+    "~/bin/sp.heap #{ @graph } #{ ss } #{ outp }"
   end
 
 
   def merge_command
-    "merge_ssout #{ @graph } #{ graph_co } #{ ss } #{ outp } #{ eps }"
+    "~/bin/merge_ssout #{ @graph } #{ graph_co } #{ ss } #{ outp } #{ eps }"
   end
 
 
