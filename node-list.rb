@@ -4,6 +4,11 @@ class NodeList
   end
 
 
+  def size
+    @list.size
+  end
+
+
   def add node
     @list << node
   end
