@@ -51,6 +51,12 @@ describe Job do
         job = Job.new( './USA-t.m-gr', [ 957498 ], [ 957498, 19200797 ] )
         job.merge_command.should match( /merge_ssout \.\/USA\-t\.m\-gr \.\/USA\.m\-co \S+\.ss \S+\.out\-p \S+\.eps/ )
       end
+
+
+      it 'should know convert command' do
+        job = Job.new( './USA-t.m-gr', [ 957498 ], [ 957498, 19200797 ] )
+        job.convert_command.should match( /convert \-transparent white \S+\.eps \S+\.png/ )
+      end
     end
   end
 end

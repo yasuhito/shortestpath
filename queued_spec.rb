@@ -94,7 +94,7 @@ describe Queued do
       it "should return 'FAILED' string if job failed" do
         @shell.stubs( :on_failure ).yields
         @client.expects( :puts ).with( 'FAILED' ).once
-        
+
         @queued.start
       end
     end

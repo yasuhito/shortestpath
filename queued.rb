@@ -74,7 +74,6 @@ class Queued
       end
 
       command = CommandBuilder.build( @node_list.get_node, graph, source, destination )
-
       log command
       shell.exec command
     end

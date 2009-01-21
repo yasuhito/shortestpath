@@ -7,9 +7,15 @@ class Job
     @destination = destination
     @graph = graph
     validate
+    @ss = make_query_file
   end
 
   
+  def convert_command
+    "convert -transparent white #{ eps } #{ png }"
+  end
+
+
   def sp_command
     "/home/yasuhito/project/sp/spsolve081229/sp.heap #{ @graph } #{ ss } #{ outp }"
   end
@@ -21,11 +27,6 @@ class Job
 
 
   private
-
-
-  def ss
-    @ss ||= make_query_file
-  end
 
 
   def validate
@@ -41,6 +42,16 @@ class Job
     if @destination.include?( nil )
       raise "invalid query #{ @destination.inspect }"
     end
+  end
+
+
+  def ss
+    @ss
+  end
+
+
+  def png
+    @tmp_path + '.png'
   end
 
 
