@@ -27,12 +27,12 @@ class Job
 
 
   def sp_command
-    "/home/yasuhito/project/sp/spsolve081229/sp.heap #{ @graph } #{ ss } #{ outp }"
+    "sp.heap #{ @graph } #{ ss } #{ outp }"
   end
 
 
   def merge_command
-    "/home/yasuhito/project/sp/tools081229/merge_ssout #{ @graph } #{ graph_co } #{ ss } #{ outp } #{ eps }"
+    "merge_ssout #{ @graph } #{ graph_co } #{ ss } #{ outp } #{ eps }"
   end
 
 
