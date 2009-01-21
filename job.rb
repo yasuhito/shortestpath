@@ -12,7 +12,7 @@ class Job
 
 
   def command
-    [ convert_command, sp_command ].join( '; ' )
+    [ sp_command, convert_command ].join( '; ' )
   end
 
   
