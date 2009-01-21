@@ -1,21 +1,27 @@
+# -*- coding: utf-8 -*-
 require 'job'
 require 'queued'
 require 'spec_helper'
 
 
 describe Queued do
+  before :each do
+    @queued = Queued.new
+
+    dummy_log = mock( 'LOG' ) do
+      stubs :puts
+      stubs :flush
+    end
+    File.stubs( :open ).with( Queued::LOG_PATH, 'w' ).returns( dummy_log )
+  end
+
+
   describe 'when starting' do
-    it 'should log and exit if cannnot open port' do
-      dummy_log = 'DUMMY LOG'
-      dummy_log.expects( :puts ).at_least_once
-      dummy_log.expects( :flush ).at_least_once
-      File.expects( :open ).with( '/tmp/queued.log', 'w' ).once.returns( dummy_log )
+    it 'should exit if cannnot open port' do
+      TCPServer.stubs( :open ).with( Queued::PORT ).raises( 'SOCKET OPEN ERROR' )
 
-      TCPServer.stubs( :open ).with( 7838 ).raises( 'SOCKET OPEN ERROR' )
-
-      queued = Queued.new
       lambda do
-        queued.start
+        @queued.start
       end.should raise_error( SystemExit )
     end
   end
@@ -23,18 +29,10 @@ describe Queued do
 
   describe 'when accepting a command' do
     before :each do
-      dummy_log = 'DUMMY LOG'
-      dummy_log.stubs( :puts )
-      dummy_log.stubs( :flush )
-      File.stubs( :open ).with( '/tmp/queued.log', 'w' ).returns( dummy_log )
-
-      @client = 'DUMMY CLIENT'
-
-      socket = 'DUMMY SOCKET'
-      socket.stubs( :accept ).returns( @client )
-
+      @client = mock( 'CLIENT' )
+      socket = mock( 'SOCKET', :accept => @client )
       Kernel.stubs( :loop ).yields
-      TCPServer.stubs( :open ).with( 7838 ).returns( socket )
+      TCPServer.stubs( :open ).with( Queued::PORT ).returns( socket )
       Thread.stubs( :start ).with( @client ).yields( @client )
     end
 
@@ -43,107 +41,75 @@ describe Queued do
     # DISPATCH Command
     ################################################################################
 
-
+    
     describe 'and dispatch command arrived' do
       before :each do
-        @queued = Queued.new
         @client.stubs( :gets ).returns( 'dispatch USA-t.m-gr 1 2 957498 957498 19200797' )
+
+        @shell = mock( 'SHELL' ) do
+          stubs :on_stdout
+          stubs :on_stderr
+          stubs :on_success
+          stubs :on_failure
+          stubs :exec
+        end
+        Popen3::Shell.stubs( :open ).yields( @shell )
+
+        # [FIXME] ノード名が決め打ち
+        CommandBuilder.stubs( :build ).with( 'ec2-72-44-39-169.compute-1.amazonaws.com', 'USA-t.m-gr', [ 957498 ], [ 957498, 19200797 ] )
       end
 
 
       it 'should dispatch a job' do
         @queued.expects( :dispatch ).with( @client, 'USA-t.m-gr', [ 957498 ], [ 957498, 19200797 ] )
+
         @queued.start
       end
 
 
       it 'should redirect stdout to client' do
-        shell = 'SHELL'
-        Popen3::Shell.stubs( :open ).yields( shell )
-        shell.stubs( :on_stdout ).yields( 'STDOUT' )
-        shell.stubs( :on_stderr )
-        shell.stubs( :on_success )
-        shell.stubs( :on_failure )
-        shell.stubs( :exec )
-
+        @shell.stubs( :on_stdout ).yields( 'STDOUT' )
         @client.expects( :puts ).with( 'STDOUT' ).once
-
-        dummy_job = 'DUMMY JOB'
-        dummy_job.stubs( :sp_command )
-        dummy_job.stubs( :merge_command )
-        Job.stubs( :new ).with( 'USA-t.m-gr', [ 957498 ], [ 957498, 19200797 ] ).returns( dummy_job )
 
         @queued.start
       end
 
 
       it 'should redirect stderr to client' do
-        shell = 'SHELL'
-        Popen3::Shell.stubs( :open ).yields( shell )
-        shell.stubs( :on_stdout )
-        shell.stubs( :on_stderr ).yields( 'STDERR' )
-        shell.stubs( :on_success )
-        shell.stubs( :on_failure )
-        shell.stubs( :exec )
-
+        @shell.stubs( :on_stderr ).yields( 'STDERR' )
         @client.expects( :puts ).with( 'STDERR' ).once
-
-        dummy_job = 'DUMMY JOB'
-        dummy_job.stubs( :sp_command )
-        dummy_job.stubs( :merge_command )
-        Job.stubs( :new ).with( 'USA-t.m-gr', [ 957498 ], [ 957498, 19200797 ] ).returns( dummy_job )
 
         @queued.start
       end
 
 
       it "should return 'OK' string if job succeeded" do
-        shell = 'SHELL'
-        Popen3::Shell.stubs( :open ).yields( shell )
-        shell.stubs( :on_stdout )
-        shell.stubs( :on_stderr )
-        shell.stubs( :on_success ).yields
-        shell.stubs( :on_failure )
-        shell.stubs( :exec )
-
+        @shell.stubs( :on_success ).yields
         @client.expects( :puts ).with( 'OK' ).once
-
-        dummy_job = 'DUMMY JOB'
-        dummy_job.stubs( :sp_command )
-        dummy_job.stubs( :merge_command )
-        Job.stubs( :new ).with( 'USA-t.m-gr', [ 957498 ], [ 957498, 19200797 ] ).returns( dummy_job )
 
         @queued.start
       end
 
 
-     it "should return 'FAILED' string if job failed" do
-        shell = 'SHELL'
-        Popen3::Shell.stubs( :open ).yields( shell )
-        shell.stubs( :on_stdout )
-        shell.stubs( :on_stderr )
-        shell.stubs( :on_success )
-        shell.stubs( :on_failure ).yields
-        shell.stubs( :exec )
-
+      it "should return 'FAILED' string if job failed" do
+        @shell.stubs( :on_failure ).yields
         @client.expects( :puts ).with( 'FAILED' ).once
-
-        dummy_job = 'DUMMY JOB'
-        dummy_job.stubs( :sp_command )
-        dummy_job.stubs( :merge_command )
-        Job.stubs( :new ).with( 'USA-t.m-gr', [ 957498 ], [ 957498, 19200797 ] ).returns( dummy_job )
-
+        
         @queued.start
-     end
+      end
     end
 
 
-    it "should exit when 'quit' command arrived" do
+    ################################################################################
+    # QUIT Command
+    ################################################################################
+
+
+    it "should exit when received 'quit' command" do
       @client.expects( :gets ).returns( 'quit' )
       
-      queued = Queued.new
       lambda do
-        queued.start
+        @queued.start
       end.should raise_error( SystemExit )
     end
 
@@ -153,13 +119,12 @@ describe Queued do
     ################################################################################
 
 
-    describe 'and unknown command arrived' do
-      it "should return 'FAILED' string" do
-        queued = Queued.new
-        @client.stubs( :gets ).returns( 'UNKNOWN COMMAND' )
-        @client.expects( :puts ).with( 'FAILED' ).once
-        queued.start
-      end
+    it "should return 'FAILED' string if received unknown command" do
+      @client.stubs( :gets ).returns( 'UNKNOWN COMMAND' )
+
+      @client.expects( :puts ).with( 'FAILED' ).once
+      
+      @queued.start
     end
   end
 end

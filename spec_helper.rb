@@ -1,7 +1,7 @@
 require 'rubygems'
 
-require 'spec'
 require 'mocha'
+require 'spec'
 
 
 Spec::Runner.configure do | config |

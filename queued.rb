@@ -1,14 +1,21 @@
-require 'job'
+# -*- coding: utf-8 -*-
+require 'command-builder'
+require 'node-list'
 require 'popen3'
 require 'pshell'
 
 
 class Queued
   PORT = 7838
+  LOG_PATH = '/tmp/queued.log'
 
 
   def initialize
-    @log = File.open( '/tmp/queued.log', 'w' )
+    @log = File.open( LOG_PATH, 'w' )
+    # [FIXME] ノードのリストが決め打ち
+    @node_list = NodeList.new( [ 'ec2-72-44-39-169.compute-1.amazonaws.com',
+                                 'ec2-75-101-252-236.compute-1.amazonaws.com',
+                                 'ec2-174-129-148-3.compute-1.amazonaws.com' ] )
   end
 
 
@@ -52,7 +59,6 @@ class Queued
 
 
   def dispatch client, graph, source, destination
-    job = Job.new( graph, source, destination )
     Popen3::Shell.open do | shell |
       shell.on_stdout do | line |
         client.puts line
@@ -67,7 +73,8 @@ class Queued
         failed client
       end
 
-      command = [ job.sp_command, job.merge_command ].join( ';' )
+      command = CommandBuilder.build( @node_list.get_node, graph, source, destination )
+
       log command
       shell.exec command
     end
