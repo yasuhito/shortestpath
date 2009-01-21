@@ -15,9 +15,14 @@ class Job
     [ sp_command, convert_command ].join( '; ' )
   end
 
-  
+
   def convert_command
     "convert -transparent white #{ eps } #{ png }"
+  end
+
+
+  def ss
+    @ss
   end
 
 
@@ -47,11 +52,6 @@ class Job
     if @destination.include?( nil )
       raise "invalid query #{ @destination.inspect }"
     end
-  end
-
-
-  def ss
-    @ss
   end
 
 
