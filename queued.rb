@@ -30,8 +30,6 @@ class Queued
         
         case command
         when /dispatch (\S+) (\d+) (\d+) (.+)/
-          log "DISPATCH COMMAND"
-
           graph = $1
           source = []
           destination = []
@@ -75,7 +73,7 @@ class Queued
       end
 
       command = CommandBuilder.build( @node_list.get_node, graph, source, destination )
-      log command
+      log_and_msg command
       shell.exec command
     end
   end
