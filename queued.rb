@@ -45,7 +45,7 @@ class Queued
         when /quit/
           exit 0
         else # FAILED
-          failed client
+          failed client, "Invalid request '#{ command }'"
         end
 
         client.close
@@ -96,7 +96,7 @@ class Queued
 
 
   def failed client, message = nil
-    msg = message ? "FAILED #{ message }" : 'FAILED'
+    msg = message ? "FAILED: #{ message }" : 'FAILED'
     log_and_msg msg
     client.puts msg
   end

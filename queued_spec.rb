@@ -138,7 +138,7 @@ describe Queued do
     it "should return 'FAILED' string if received unknown command" do
       @client.stubs( :gets ).returns( 'UNKNOWN COMMAND' )
 
-      @client.expects( :puts ).with( 'FAILED' ).once
+      @client.expects( :puts ).with( "FAILED: Invalid request 'UNKNOWN COMMAND'" ).once
       
       @queued.start
     end
