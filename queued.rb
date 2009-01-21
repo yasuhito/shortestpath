@@ -10,12 +10,9 @@ class Queued
   LOG_PATH = '/tmp/queued.log'
 
 
-  def initialize
+  def initialize node_list
     @log = File.open( LOG_PATH, 'w' )
-    # [FIXME] ノードのリストが決め打ち
-    @node_list = NodeList.new( [ 'ec2-72-44-39-169.compute-1.amazonaws.com',
-                                 'ec2-75-101-252-236.compute-1.amazonaws.com',
-                                 'ec2-174-129-148-3.compute-1.amazonaws.com' ] )
+    @node_list = NodeList.new( node_list )
   end
 
 

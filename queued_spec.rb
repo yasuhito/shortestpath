@@ -6,7 +6,9 @@ require 'spec_helper'
 
 describe Queued do
   before :each do
-    @queued = Queued.new
+    @queued = Queued.new( [ 'ec2-72-44-39-169.compute-1.amazonaws.com',
+                            'ec2-75-101-252-236.compute-1.amazonaws.com',
+                            'ec2-174-129-148-3.compute-1.amazonaws.com' ] )
 
     STDOUT.stubs :puts
 
