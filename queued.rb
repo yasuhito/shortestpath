@@ -77,7 +77,7 @@ class Queued
       rescue
         failed client, $!.to_s
         $!.backtrace.each do | each |
-          log_and_msg each
+          log each
         end
         return
       end
