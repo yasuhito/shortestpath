@@ -1,10 +1,12 @@
 require 'rubygems'
 
+require 'net/telnet'
 require 'queued'
 require 'rake/clean'
 require 'spec'
 require 'spec/rake/spectask'
 require 'spec/rake/verify_rcov'
+require 'thread_pool'
 
 
 task :default => :verify_rcov
@@ -26,7 +28,37 @@ Spec::Rake::SpecTask.new do | t |
 end
 
 
-task :start do
+task :run do
+  pool = ThreadPool.new( 16 )
+
+  ss = Dir.glob( '/tmp/count3109-3000/*.ss' )
+  ss.each do | each |
+    puts "SS: #{ each }"
+
+    s = []
+    d = []
+    IO.readlines( each ).each do | line |
+      if /^s (\d+)/=~ line.chomp
+        s << $1        
+      end
+      if /^d (\d+)/=~ line.chomp
+        d << $1
+      end
+    end
+
+    pool.dispatch( each, s, d ) do | ss, s, d |
+      telnet = Net::Telnet.new( "Host" => "localhost", "Port" => 7838, "Timeout" => 1000 )
+      telnet.cmd "dispatch /home/yasuhito/USA-t.m-gr #{ s.size } #{ d.size } #{ s.join( ' ' ) } #{ d.join( ' ' ) }" do | l |
+        puts l
+      end
+    end
+  end
+
+  pool.shutdown
+end
+
+
+task :server do
   node_list = IO.readlines( 'node_list.txt' ).collect do | each |
     each.chomp
   end
