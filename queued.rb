@@ -47,6 +47,8 @@ class Queued
         else # FAILED
           failed client
         end
+
+        client.close
       end
     end
   end

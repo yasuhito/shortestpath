@@ -31,7 +31,9 @@ describe Queued do
 
   describe 'when accepting a command' do
     before :each do
-      @client = mock( 'CLIENT' )
+      @client = mock( 'CLIENT' ) do
+        stubs :close
+      end
       socket = mock( 'SOCKET', :accept => @client ) do
         stubs( :addr ).returns [ "AF_INET", Queued::PORT, "host.domain", "192.168.0.1" ]
       end
