@@ -10,7 +10,7 @@ describe CommandBuilder, 'when building a command' do
 
     command = CommandBuilder.build( 'NODE', 'GRAPH', 'SOURCE', 'DESTINATION' )
 
-    command.should == 'ssh NODE COMMAND'
+    command.should == "ssh NODE 'COMMAND'"
   end
 end
 

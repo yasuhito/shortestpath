@@ -10,6 +10,11 @@ class Job
     @ss = make_query_file
   end
 
+
+  def command
+    [ convert_command, sp_command ].join( '; ' )
+  end
+
   
   def convert_command
     "convert -transparent white #{ eps } #{ png }"
