@@ -32,7 +32,9 @@ describe Queued do
   describe 'when accepting a command' do
     before :each do
       @client = mock( 'CLIENT' )
-      socket = mock( 'SOCKET', :accept => @client )
+      socket = mock( 'SOCKET', :accept => @client ) do
+        stubs( :addr ).returns [ "AF_INET", Queued::PORT, "host.domain", "192.168.0.1" ]
+      end
       Kernel.stubs( :loop ).yields
       TCPServer.stubs( :open ).with( Queued::PORT ).returns( socket )
       Thread.stubs( :start ).with( @client ).yields( @client )
