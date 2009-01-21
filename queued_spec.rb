@@ -101,7 +101,7 @@ describe Queued do
 
       it "should return 'OK' string if job succeeded" do
         @shell.stubs( :on_success ).yields
-        @client.expects( :puts ).with( 'OK' ).once
+        @client.expects( :puts ).with( 'OK ec2-72-44-39-169.compute-1.amazonaws.com:' ).once
 
         @queued.start
       end
@@ -138,7 +138,7 @@ describe Queued do
     it "should return 'FAILED' string if received unknown command" do
       @client.stubs( :gets ).returns( 'UNKNOWN COMMAND' )
 
-      @client.expects( :puts ).with( "FAILED: Invalid request 'UNKNOWN COMMAND'" ).once
+      @client.expects( :puts ).with( "FAILED Invalid request 'UNKNOWN COMMAND'" ).once
       
       @queued.start
     end

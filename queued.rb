@@ -61,21 +61,25 @@ class Queued
 
   def dispatch client, graph, source, destination
     Popen3::Shell.open do | shell |
+      node = @node_list.get_node
+      png = nil
+
       shell.on_stdout do | line |
+        png = $1 if /\AOK (.+)/=~ line
         client.puts line
       end
       shell.on_stderr do | line |
         client.puts line
       end
       shell.on_success do
-        ok client
+        ok client, "#{ node }:#{ png }"
       end
       shell.on_failure do
         failed client
       end
 
       begin
-        command = CommandBuilder.build( @node_list.get_node, graph, source, destination )
+        command = CommandBuilder.build( node, graph, source, destination )
       rescue
         failed client, $!.to_s
         $!.backtrace.each do | each |
@@ -91,14 +95,14 @@ class Queued
 
 
   def ok client, message = nil
-    msg = message ? "OK: #{ message }" : 'OK'
+    msg = message ? "OK #{ message }" : 'OK'
     log_and_msg msg
     client.puts msg
   end
 
 
   def failed client, message = nil
-    msg = message ? "FAILED: #{ message }" : 'FAILED'
+    msg = message ? "FAILED #{ message }" : 'FAILED'
     log_and_msg msg
     client.puts msg
   end
