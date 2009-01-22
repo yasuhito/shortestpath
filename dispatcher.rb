@@ -43,22 +43,16 @@ class Dispatcher
   end
 
 
-  def log_and_msg message
-    @logger.log message
-    STDOUT.puts message
-  end
-
-
   def failed client, message = nil
     msg = message ? "FAILED #{ message }" : 'FAILED'
-    log_and_msg msg
+    @logger.log_and_msg msg
     client.puts msg
   end
 
 
   def ok client, message = nil
     msg = message ? "OK #{ message }" : 'OK'
-    log_and_msg msg
+    @logger.log_and_msg msg
     client.puts msg
   end
 
@@ -95,7 +89,7 @@ class Dispatcher
       begin
         command = CommandBuilder.build( node, graph, source, destination )
       rescue
-        log_and_msg $!.to_s
+        @logger.log_and_msg $!.to_s
         failed client, 'Invalid request'
         @mutex.synchronize do
           @node_list.add_node node
@@ -108,7 +102,7 @@ class Dispatcher
         return
       end
 
-      log_and_msg command
+      @logger.log_and_msg command
       shell.exec command
     end
   end
