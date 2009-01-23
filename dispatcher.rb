@@ -11,6 +11,7 @@ class Dispatcher
     @clients = []
     @nodes = nodes
     @logger = logger
+    @cui = CUI.new
   end
 
 
@@ -76,14 +77,14 @@ class Dispatcher
       shell.on_success do
         ok client, "#{ node }:#{ png }"
         @nodes.deallocate_from client
-        CUI.finished node
+        @cui.finished node
         client.close
       end
 
       shell.on_failure do
         failed client
         @nodes.deallocate_from client
-        CUI.failed node
+        @cui.failed node
         client.close
       end
 
@@ -94,7 +95,7 @@ class Dispatcher
         return
       end
 
-      CUI.started node
+      @cui.started node
       @logger.log command
       shell.exec command
     end

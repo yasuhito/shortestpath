@@ -3,58 +3,75 @@ require 'color'
 
 
 class CUI
-  @@nodes = []
-  @@started = Hash.new( 0 )
-  @@finished = Hash.new( 0 )
-  @@failed = Hash.new( 0 )
-  @@last_updated = Time.now
-  @@mutex = Mutex.new
+  def initialize
+    @node_state = Hash.new( [] )
+    @last_updated = Time.now
+    @mutex = Mutex.new
+  end
 
 
-  def self.update nodes
-    # 表示がチラつかないようにする
+  def update
     now = Time.now
-    return if now - @@last_updated < 0.2
-    @@last_updated = now
+    return if update_freq_high?( now )
 
+    reset_terminal
+
+    @node_state.keys.sort.each do | node |
+      status = @node_state[ node ].collect do | each |
+        case each
+        when :started
+          Color.yellow '#'
+        when :finished
+          Color.slate '#'
+        when :failed
+          Color.pink '#'
+        end
+      end
+      STDOUT.puts "#{ node }: #{ status }"
+    end
+
+    @last_updated = now
+  end
+
+
+  def failed node
+    @mutex.synchronize do
+      @node_state[ node ].pop
+      @node_state[ node ] += [ :failed ]
+      update
+    end
+  end
+
+
+  def started node
+    @mutex.synchronize do
+      @node_state[ node ] += [ :started ]
+      update
+    end
+  end
+
+
+  def finished node
+    @mutex.synchronize do
+      @node_state[ node ].pop
+      @node_state[ node ] += [ :finished ]
+      update
+    end
+  end
+
+
+  ################################################################################
+  private
+  ################################################################################
+
+
+  def reset_terminal
     Kernel.system 'tput clear'
     Kernel.system 'tput cup 0 0'
-
-    nodes.sort.each do | each |
-      started = Color.yellow( '#' * @@started[ each ] )
-      finished = Color.slate( '#' * @@finished[ each ] )
-      failed = Color.pink( '#' * @@failed[ each ] )
-
-      STDOUT.puts "#{ each }: #{ finished }#{ failed }#{ started }"
-    end
   end
 
 
-  def self.failed node
-    @@mutex.synchronize do
-      @@started[ node ] = @@started[ node ] - 1
-      @@failed[ node ] = @@failed[ node ] + 1
-      update @@nodes
-    end
-  end
-
-
-  def self.started node
-    @@mutex.synchronize do
-      unless @@nodes.include?( node )
-        @@nodes << node
-      end
-      @@started[ node ] = @@started[ node ] + 1
-      update @@nodes
-    end
-  end
-
-
-  def self.finished node
-    @@mutex.synchronize do
-      @@started[ node ] = @@started[ node ] - 1
-      @@finished[ node ] = @@finished[ node ] + 1
-      update @@nodes
-    end
+  def update_freq_high? now
+     now - @last_updated < 0.2
   end
 end
