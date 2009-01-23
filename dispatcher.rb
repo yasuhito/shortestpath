@@ -83,7 +83,7 @@ class Dispatcher
       shell.on_failure do
         failed client
         @nodes.deallocate_from client
-        # [TODO] 失敗の CUI 表示
+        CUI.failed node
         client.close
       end
 

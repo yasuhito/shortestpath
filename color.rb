@@ -16,6 +16,11 @@ class Color
   def self.yellow str
     YELLOW + str + RESET
   end
+
+
+  def self.pink str
+    PINK + str + RESET
+  end
 end
 
 

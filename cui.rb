@@ -6,6 +6,7 @@ class CUI
   @@nodes = []
   @@started = Hash.new( 0 )
   @@finished = Hash.new( 0 )
+  @@failed = Hash.new( 0 )
   @@last_updated = Time.now
   @@mutex = Mutex.new
 
@@ -13,17 +14,27 @@ class CUI
   def self.update nodes
     # 表示がチラつかないようにする
     now = Time.now
-    return if now - @@last_updated < 1
+    return if now - @@last_updated < 0.2
     @@last_updated = now
 
     Kernel.system 'tput clear'
     Kernel.system 'tput cup 0 0'
 
     nodes.sort.each do | each |
-      finished = Color.slate( '#' * @@finished[ each ] )
       started = Color.yellow( '#' * @@started[ each ] )
-        
-      STDOUT.puts "#{ each }: #{ finished }#{ started }"
+      finished = Color.slate( '#' * @@finished[ each ] )
+      failed = Color.pink( '#' * @@failed[ each ] )
+
+      STDOUT.puts "#{ each }: #{ finished }#{ failed }#{ started }"
+    end
+  end
+
+
+  def self.failed node
+    @@mutex.synchronize do
+      @@started[ node ] = @@started[ node ] - 1
+      @@failed[ node ] = @@failed[ node ] + 1
+      update @@nodes
     end
   end
 

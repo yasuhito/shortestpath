@@ -6,7 +6,7 @@ require 'spec_helper'
 describe CUI do
   before :each do
     # 表示がチラつかないようにする仕組みを発動させない
-    sleep 1.1
+    sleep 0.5
   end
 
 
