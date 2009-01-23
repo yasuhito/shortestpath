@@ -6,14 +6,14 @@ require 'spec_helper'
 
 describe Queued do
   before :each do
+    STDOUT.stubs :puts
+
     @dispatcher = mock( 'DISPATCHER' )
     Dispatcher.stubs( :new ).returns( @dispatcher )
 
     @queued = Queued.new( [ 'ec2-72-44-39-169.compute-1.amazonaws.com',
                             'ec2-75-101-252-236.compute-1.amazonaws.com',
                             'ec2-174-129-148-3.compute-1.amazonaws.com' ] )
-
-    STDOUT.stubs :puts
 
     dummy_log = mock( 'LOG' ) do
       stubs :puts

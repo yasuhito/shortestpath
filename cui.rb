@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 require 'color'
 
 
@@ -9,21 +10,20 @@ class CUI
   @@mutex = Mutex.new
 
 
-  def self.display
-    @@mutex.synchronize do
-      now = Time.now
-      return if now - @@last_updated < 1
-      @@last_updated = now
+  def self.update nodes
+    # 表示がチラつかないようにする
+    now = Time.now
+    return if now - @@last_updated < 1
+    @@last_updated = now
 
-      system 'tput clear'
-      system 'tput cup 0 0'
+    Kernel.system 'tput clear'
+    Kernel.system 'tput cup 0 0'
 
-      @@nodes.sort.each do | each |
-        finished = Color.slate( '#' * @@finished[ each ] )
-        started = Color.yellow( '#' * @@started[ each ] )
+    nodes.sort.each do | each |
+      finished = Color.slate( '#' * @@finished[ each ] )
+      started = Color.yellow( '#' * @@started[ each ] )
         
-        puts "#{ each }: #{ finished }#{ started }"
-      end
+      STDOUT.puts "#{ each }: #{ finished }#{ started }"
     end
   end
 
@@ -34,7 +34,7 @@ class CUI
         @@nodes << node
       end
       @@started[ node ] = @@started[ node ] + 1
-      display
+      update @@nodes
     end
   end
 
@@ -43,7 +43,7 @@ class CUI
     @@mutex.synchronize do
       @@started[ node ] = @@started[ node ] - 1
       @@finished[ node ] = @@finished[ node ] + 1
-      display
+      update @@nodes
     end
   end
 end

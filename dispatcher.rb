@@ -61,7 +61,6 @@ class Dispatcher
 
 
   def exec node, client, graph, source, destination
-    node = nil
     Popen3::Shell.open do | shell |
       png = nil
 

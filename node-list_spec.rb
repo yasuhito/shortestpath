@@ -3,43 +3,27 @@ require 'spec_helper'
 
 
 describe NodeList do
-  before :each do
-    @node_list = NodeList.new( [] )
-  end
-
- 
   it 'should have empty node list at first' do
-    @node_list.should be_empty
+    nodes = NodeList.new( [] )
+    nodes.should be_empty
   end
 
 
-  it 'should be initialized with an Array of node' do
-    node_list = NodeList.new( [ 'NODE A', 'NODE B', 'NODE C' ] )
-    node_list.to_ary == [ 'NODE A', 'NODE B', 'NODE C' ]
-  end
+  describe 'when (de)allocating jobs' do
+    it 'should allocate available node' do
+      nodes = NodeList.new( [ 'NODE A', 'NODE B', 'NODE C' ] )
 
+      nodes.allocate_to( 'CLIENT A' ).should == 'NODE A'
+      nodes.allocate_to( 'CLIENT B' ).should == 'NODE B'
+      nodes.allocate_to( 'CLIENT C' ).should == 'NODE C'
+      nodes.allocate_to( 'CLIENT D' ).should be_nil
+      nodes.should be_empty
 
-  describe 'when adding a node' do
-    it 'should hold a node list' do
-      @node_list.add 'NODE A'
-      @node_list.add 'NODE B'
-      @node_list.add 'NODE C'
-
-      @node_list.to_ary.should == [ 'NODE A', 'NODE B', 'NODE C' ]
-    end
-  end
-
-
-  describe 'when dispatching a job' do
-    it 'should return available node' do
-      @node_list.add 'NODE A'
-      @node_list.add 'NODE B'
-      @node_list.add 'NODE C'
-
-      @node_list.get.should == 'NODE A'
-      @node_list.get.should == 'NODE B'
-      @node_list.get.should == 'NODE C'
-      @node_list.get.should be_nil
+      nodes.deallocate_from( 'CLIENT A' ).should == 'NODE A'
+      nodes.deallocate_from( 'CLIENT B' ).should == 'NODE B'
+      nodes.deallocate_from( 'CLIENT C' ).should == 'NODE C'
+      nodes.deallocate_from( 'CLIENT D' ).should be_nil
+      nodes.should_not be_empty
     end
   end
 end

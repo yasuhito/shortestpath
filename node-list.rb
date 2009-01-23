@@ -23,6 +23,7 @@ class NodeList
       @nodes << node
       @clients -= [ client ]
       @allocation.delete client
+      node
     end
   end
 
