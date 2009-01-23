@@ -3,8 +3,11 @@ require 'color'
 
 
 class CUI
-  def initialize
-    @node_state = Hash.new( [] )
+  def initialize nodes
+    @node_state = {}
+    nodes.each do | each |
+      @node_state[ each ] = []
+    end
     @last_updated = Time.now
     @mutex = Mutex.new
   end

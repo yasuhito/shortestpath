@@ -37,8 +37,8 @@ describe Dispatcher do
 
 
     it 'should allocate a node' do
-      @nodes.expects( :allocate_to ).with( @client ).returns( 'NODE' )
-      @dispatcher.expects( :exec ).with( 'NODE', @client, 'USA-t.m-gr', [ 957498 ], [ 957498, 19200797 ] )
+      @nodes.expects( :allocate_to ).with( @client ).returns( 'NODE_A' )
+      @dispatcher.expects( :exec ).with( 'NODE_A', @client, 'USA-t.m-gr', [ 957498 ], [ 957498, 19200797 ] )
 
       @dispatcher.dispatch @client, 'USA-t.m-gr', [ 957498 ], [ 957498, 19200797 ]
     end
@@ -46,7 +46,7 @@ describe Dispatcher do
 
     describe 'and executing a job' do
       before :each do
-        @nodes.stubs( :allocate_to ).returns( 'NODE' )
+        @nodes.stubs( :allocate_to ).returns( 'NODE_A' )
 
         @shell = mock( 'SHELL' ) do
           stubs( :on_stdout ).yields( 'OK PNG=/PATH/FILENAME.PNG' )
@@ -73,7 +73,7 @@ describe Dispatcher do
       it "should return 'OK NODE_NAME:PNG_PATH' then close connection if succeeded" do
         @shell.stubs( :on_success ).yields
 
-        @client.expects( :puts ).with( 'OK NODE:/PATH/FILENAME.PNG' )
+        @client.expects( :puts ).with( 'OK NODE_A:/PATH/FILENAME.PNG' )
         @client.expects( :close )
 
         @dispatcher.dispatch @client, 'USA-t.m-gr', [ 957498 ], [ 957498, 19200797 ]

@@ -5,8 +5,9 @@ require 'spec_helper'
 
 describe CUI do
   before :each do
-    @cui = CUI.new
-    Kernel.stubs( :system )
+    @cui = CUI.new( [ 'NODE A', 'NODE B' ] )
+    Kernel.stubs :system
+    STDOUT.stubs :puts
   end
 
 

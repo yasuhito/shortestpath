@@ -7,6 +7,11 @@ class NodeList
   end
 
 
+  def to_ary
+    @nodes
+  end
+
+
   def allocate_to client
     @mutex.synchronize do
       @clients << client

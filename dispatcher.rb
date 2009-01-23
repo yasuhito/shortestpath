@@ -11,7 +11,7 @@ class Dispatcher
     @clients = []
     @nodes = nodes
     @logger = logger
-    @cui = CUI.new
+    @cui = CUI.new( @nodes.to_ary )
   end
 
 
