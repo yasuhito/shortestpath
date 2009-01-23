@@ -41,7 +41,6 @@ class Queued
     Kernel.loop do
       Thread.start( socket.accept ) do | client |
         command = client.gets.chomp
-        # @logger.log_and_msg command
         
         case command
         when /dispatch (\S+) (\d+) (\d+) (.+)/

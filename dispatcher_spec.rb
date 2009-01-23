@@ -51,7 +51,7 @@ describe Dispatcher do
     it "should return 'FAILED'" do
       CommandBuilder.stubs( :build ).raises( 'INVALID JOB' )
 
-      @client.expects( :puts ).with( 'FAILED INVALID JOB' )
+      @client.expects( :puts ).with( 'FAILED Invalid request' )
       @client.expects( :close )
 
       @dispatcher.dispatch @client, 'USA-t.m-gr', [ 957498 ], [ 957498, 19200797 ]
@@ -77,7 +77,7 @@ describe Dispatcher do
     it 'should log stderr' do
       @shell.stubs( :on_stderr ).yields( 'STDERR' )
 
-      @logger.expects( :log_and_msg ).with( 'STDERR' )
+      @logger.expects( :log ).with( 'STDERR' )
 
       @dispatcher.dispatch @client, 'USA-t.m-gr', [ 957498 ], [ 957498, 19200797 ]
     end
@@ -97,6 +97,7 @@ describe Dispatcher do
       @shell.stubs( :on_failure ).yields
 
       @client.expects( :puts ).with( 'FAILED' )
+      @client.expects( :close )
 
       @dispatcher.dispatch @client, 'USA-t.m-gr', [ 957498 ], [ 957498, 19200797 ]
     end

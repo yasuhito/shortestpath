@@ -1,20 +1,18 @@
 class NodeList
-  def initialize list = nil
-    @list = ( list ? list : [] )
+  attr_reader :list
+
+
+  def initialize list
+    @list = list
   end
 
 
-  def get_node
+  def get
     @list.shift
   end
 
 
-  def add_node node
+  def add node
     @list << node
-  end
-
-
-  def get_list
-    @list
   end
 end
