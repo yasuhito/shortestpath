@@ -1,18 +1,35 @@
 class NodeList
-  attr_reader :list
-
-
   def initialize list
-    @list = list
+    @mutex = Mutex.new
+    @nodes = list
+    @clients = []
+    @allocation = {}
   end
 
 
-  def get
-    @list.shift
+  def allocate_to client
+    @mutex.synchronize do
+      @clients << client
+      node = @nodes.shift
+      @allocation[ client ] = node
+      node
+    end
   end
 
 
-  def add node
-    @list << node
+  def deallocate_from client
+    @mutex.synchronize do
+      node = @allocation[ client ]
+      @nodes << node
+      @clients -= [ client ]
+      @allocation.delete client
+    end
+  end
+
+
+  def empty?
+    @mutex.synchronize do
+      @nodes.empty?
+    end
   end
 end

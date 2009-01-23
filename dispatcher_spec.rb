@@ -10,13 +10,13 @@ describe Dispatcher do
     end
     STDOUT.stubs( :puts )
     @client = mock( 'CLIENT' )
-    @dispatcher = Dispatcher.new( [ 'NODE_A', 'NODE_B', 'NODE_C' ], @logger )
+    @dispatcher = Dispatcher.new( NodeList.new( [ 'NODE_A', 'NODE_B', 'NODE_C' ] ), @logger )
   end
 
  
   describe 'when queue is full' do
     it 'should close connection' do
-      @dispatcher.stubs( :max_size ).returns( 0 )
+      @dispatcher.stubs( :max_queue_size ).returns( 0 )
 
       @client.expects( :puts ).with( 'FAILED Queue is full' )
       @client.expects( :close )
@@ -33,7 +33,7 @@ describe Dispatcher do
 
 
     it 'should keep a client list' do
-      @dispatcher.expects( :add_client ).with( @client )
+      @dispatcher.expects( :allocate_node_to ).with( @client )
 
       @dispatcher.dispatch @client, 'USA-t.m-gr', [ 957498 ], [ 957498, 19200797 ]
     end
@@ -62,7 +62,7 @@ describe Dispatcher do
   describe 'when job being executed' do
     before :each do
       @shell = mock( 'SHELL' ) do
-        stubs( :on_stdout ).yields( 'OK /PATH/FILENAME.PNG' )
+        stubs( :on_stdout ).yields( 'OK PNG=/PATH/FILENAME.PNG' )
         stubs :on_stderr
         stubs :on_success
         stubs :on_failure

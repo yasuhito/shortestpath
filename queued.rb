@@ -30,7 +30,8 @@ class Queued
 
   def initialize node_list
     @logger = Logger.new
-    @dispatcher = Dispatcher.new( node_list, @logger )
+    @dispatcher = Dispatcher.new( NodeList.new( node_list ), @logger )
+    puts "#{ node_list.size } nodes: (#{ node_list.join( ', ' )})"
   end
 
 

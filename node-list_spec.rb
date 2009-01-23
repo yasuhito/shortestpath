@@ -9,13 +9,13 @@ describe NodeList do
 
  
   it 'should have empty node list at first' do
-    @node_list.list.should be_empty
+    @node_list.should be_empty
   end
 
 
-  it 'should be initialized with node list' do
+  it 'should be initialized with an Array of node' do
     node_list = NodeList.new( [ 'NODE A', 'NODE B', 'NODE C' ] )
-    node_list.list == [ 'NODE A', 'NODE B', 'NODE C' ]
+    node_list.to_ary == [ 'NODE A', 'NODE B', 'NODE C' ]
   end
 
 
@@ -25,7 +25,7 @@ describe NodeList do
       @node_list.add 'NODE B'
       @node_list.add 'NODE C'
 
-      @node_list.list.should == [ 'NODE A', 'NODE B', 'NODE C' ]
+      @node_list.to_ary.should == [ 'NODE A', 'NODE B', 'NODE C' ]
     end
   end
 

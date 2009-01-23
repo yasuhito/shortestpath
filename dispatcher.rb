@@ -7,26 +7,21 @@ require 'pshell'
 
 
 class Dispatcher
-  def initialize node_list, logger
+  def initialize nodes, logger
     @clients = []
-    @mutex = Mutex.new
-    @node_list = NodeList.new( node_list )
-    puts "#{ @node_list.list.size } nodes: (#{ @node_list.list.join( ', ' )})"
-    @max_size = node_list.size
+    @nodes = nodes
     @logger = logger
   end
 
 
   def dispatch client, graph, source, destination
-    @mutex.synchronize do
-      if @clients.size >= max_size
-        failed client, 'Queue is full'
-        client.close
-        return
-      end
-      add_client client
+    if queue_full?
+      failed client, 'Queue is full'
+      client.close
+      return
     end
-    exec client, graph, source, destination
+    node = @nodes.allocate_to( client )
+    exec node, client, graph, source, destination
   end
 
 
@@ -35,18 +30,8 @@ class Dispatcher
   ################################################################################
 
 
-  def max_size
-    @max_size
-  end
-
-
-  def add_client client
-    @clients << client
-  end
-
-
-  def remove_client client
-    @clients -= [ client ]
+  def queue_full?
+    @nodes.empty?
   end
 
 
@@ -64,16 +49,24 @@ class Dispatcher
   end
 
 
-  def exec client, graph, source, destination
+  def settle_invalid_request client, node
+    @logger.log $!.to_s
+    failed client, 'Invalid request'
+    @nodes.deallocate_from client
+    client.close
+    $!.backtrace.each do | each |
+      @logger.log each
+    end
+  end
+
+
+  def exec node, client, graph, source, destination
     node = nil
     Popen3::Shell.open do | shell |
-      @mutex.synchronize do
-        node = @node_list.get
-      end
       png = nil
 
       shell.on_stdout do | line |
-        png = $1 if /\AOK (.+)/=~ line
+        png = $1 if /\AOK PNG=(.+)/=~ line
         @logger.log line
       end
 
@@ -83,42 +76,26 @@ class Dispatcher
 
       shell.on_success do
         ok client, "#{ node }:#{ png }"
-        @mutex.synchronize do
-          @node_list.add node
-          remove_client client
-          CUI.finished node
-        end
+        @nodes.deallocate_from client
+        CUI.finished node
         client.close
       end
 
       shell.on_failure do
         failed client
-        @mutex.synchronize do
-          @node_list.add node
-          remove_client client
-        end
+        @nodes.deallocate_from client
+        # [TODO] 失敗の CUI 表示
         client.close
       end
 
       begin
         command = CommandBuilder.build( node, graph, source, destination )
       rescue
-        @logger.log $!.to_s
-        failed client, 'Invalid request'
-        @mutex.synchronize do
-          @node_list.add node
-          remove_client client
-        end
-        client.close
-        $!.backtrace.each do | each |
-          @logger.log each
-        end
+        settle_invalid_request client, node
         return
       end
 
-      @mutex.synchronize do
-        CUI.started node
-      end
+      CUI.started node
       @logger.log command
       shell.exec command
     end
