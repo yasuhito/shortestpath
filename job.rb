@@ -21,8 +21,8 @@ class Job
   end
 
 
-  def convert_command
-    "convert -transparent white #{ eps } #{ png } && echo 'OK #{ png }'"
+  def merge_command
+    "~/bin/merge_ssout #{ @graph } #{ graph_co } #{ ss } #{ outp } #{ eps }"
   end
 
 
@@ -31,8 +31,8 @@ class Job
   end
 
 
-  def merge_command
-    "~/bin/merge_ssout #{ @graph } #{ graph_co } #{ ss } #{ outp } #{ eps }"
+  def convert_command
+    "convert -transparent white #{ eps } #{ png } && echo 'OK PNG=#{ png }'"
   end
 
 

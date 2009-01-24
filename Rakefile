@@ -43,10 +43,31 @@ def parse_ss ss
 end
 
 
+def scp_png path
+  target_dir = File.join( '/tmp', path.split( ':' )[ 0 ] )
+  puts "SCPing #{ path } to #{ target_dir } ..."
+  system "scp #{ path } #{ target_dir }"
+end
+
+
+def node_list
+  IO.readlines( 'node_list.txt' ).collect do | each |
+    each.chomp
+  end
+end
+
+
 task :run do
-  pool = ThreadPool.new( 18 )
+  pool = ThreadPool.new( 16 )
 
   ss = Dir.glob( '/tmp/count3109-3000/*.ss' )
+
+  node_list.each do | each |
+    dir = File.join( '/tmp', each )
+    unless FileTest.directory?( dir )
+      FileUtils.mkdir dir
+    end
+  end
 
   ss.each do | each |
     puts "SS: #{ each }"
@@ -56,8 +77,11 @@ task :run do
       begin
         telnet = Net::Telnet.new( "Host" => "localhost", "Port" => 7838, "Timeout" => 1000 )
         telnet.cmd "dispatch /home/yasuhito/USA-t.m-gr #{ s.size } #{ d.size } #{ s.join( ' ' ) } #{ d.join( ' ' ) }" do | l |
-          if /^FAILED/=~ l
+          case l
+          when /^FAILED/
             raise "Queue is full"
+          when /^OK (\S+:\S+\.png)/
+            scp_png $1
           end
         end
       rescue
@@ -73,10 +97,6 @@ end
 
 
 task :server do
-  node_list = IO.readlines( 'node_list.txt' ).collect do | each |
-    each.chomp
-  end
-
   q = Queued.new( node_list )
   q.start
 end

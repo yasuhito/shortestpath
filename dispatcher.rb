@@ -66,8 +66,7 @@ class Dispatcher
       png = nil
 
       shell.on_stdout do | line |
-        png = $1 if /\AOK PNG=(.+)/=~ line
-        @logger.log line
+        ( /\AOK PNG=(.+)/=~ line ) ? png = $1 : @logger.log( line )
       end
 
       shell.on_stderr do | line |
