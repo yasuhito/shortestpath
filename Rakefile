@@ -28,6 +28,44 @@ Spec::Rake::SpecTask.new do | t |
 end
 
 
+task :run do
+  pool = ThreadPool.new( node_list.size )
+  make_target_dirs
+  
+  ss_all.each do | each |
+    puts "SS: #{ each }"
+    pool.dispatch( each, *parse_ss( each ) ) do | ss, s, d |
+      begin
+        telnet( s, d ) do | l |
+          case l
+          when /^FAILED/
+            raise "Queue is full"
+          when /^OK (\S+:\S+\.png)/
+            scp_png $1
+          end
+        end
+      rescue
+        sleep 1
+        $stderr.puts "Retrying #{ ss } ... "
+        retry
+      end
+    end
+  end
+  pool.shutdown
+end
+
+
+task :server do
+  q = Queued.new( node_list )
+  q.start
+end
+
+
+def ss_all
+  Dir.glob '/tmp/count3109-3000/*.ss'
+end
+
+
 def parse_ss ss
   s = []
   d = []
@@ -57,48 +95,21 @@ def node_list
 end
 
 
-task :run do
-  pool = ThreadPool.new( 16 )
+def telnet s, d, &block
+  telnet = Net::Telnet.new( 'Host' => 'localhost', 'Port' => 7838, 'Timeout' => 10000 )
+  telnet.cmd "dispatch /home/yasuhito/USA-t.m-gr #{ s.size } #{ d.size } #{ s.join( ' ' ) } #{ d.join( ' ' ) }" do | line |
+    block.call line
+  end
+end
 
-  ss = Dir.glob( '/tmp/count3109-3000/*.ss' )
 
+def make_target_dirs
   node_list.each do | each |
     dir = File.join( '/tmp', each )
     unless FileTest.directory?( dir )
       FileUtils.mkdir dir
     end
   end
-
-  ss.each do | each |
-    puts "SS: #{ each }"
-
-    s, d = parse_ss( each )
-    pool.dispatch( each, s, d ) do | ss, s, d |
-      begin
-        telnet = Net::Telnet.new( "Host" => "localhost", "Port" => 7838, "Timeout" => 1000 )
-        telnet.cmd "dispatch /home/yasuhito/USA-t.m-gr #{ s.size } #{ d.size } #{ s.join( ' ' ) } #{ d.join( ' ' ) }" do | l |
-          case l
-          when /^FAILED/
-            raise "Queue is full"
-          when /^OK (\S+:\S+\.png)/
-            scp_png $1
-          end
-        end
-      rescue
-        sleep 1
-        $stderr.puts "Retrying #{ ss } ... "
-        retry
-      end
-    end
-  end
-
-  pool.shutdown
-end
-
-
-task :server do
-  q = Queued.new( node_list )
-  q.start
 end
 
 

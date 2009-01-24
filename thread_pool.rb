@@ -16,7 +16,7 @@ class ThreadPool
       # Wait for space in the pool
       @pool_mutex.synchronize do
         while @pool.size >= @max_size
-          $stderr.puts "Pool is full; waiting to run #{ args.first }..."
+          $stderr.puts "Pool is full; waiting to run #{ args.first } ..."
           # Sleep until some other thread calls @pool_cv.signal.
           @waiting << Thread.current
           @pool_cv.wait @pool_mutex
