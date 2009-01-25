@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 require 'command-builder'
 require 'cui'
+require 'fileutils'
 require 'node-list'
 require 'popen3'
 require 'pshell'
@@ -64,6 +65,14 @@ class Dispatcher
   def exec node, client, graph, source, destination
     Popen3::Shell.open do | shell |
       png = nil
+      command = nil
+
+      begin
+        command = CommandBuilder.build( node, graph, source, destination )
+      rescue
+        settle_invalid_request client, node
+        return
+      end
 
       shell.on_stdout do | line |
         ( /\AOK PNG=(.+)/=~ line ) ? png = $1 : @logger.log( line )
@@ -87,16 +96,9 @@ class Dispatcher
         client.close
       end
 
-      begin
-        command = CommandBuilder.build( node, graph, source, destination )
-      rescue
-        settle_invalid_request client, node
-        return
-      end
-
       @cui.started node
-      @logger.log command
-      shell.exec command
+      @logger.log command.to_str
+      shell.exec command.to_str
     end
   end
 end

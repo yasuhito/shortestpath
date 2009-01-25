@@ -48,6 +48,14 @@ describe Dispatcher do
       before :each do
         @nodes.stubs( :allocate_to ).returns( 'NODE_A' )
 
+        FileUtils.stubs( :rm ).with( 'SS' )
+
+        command = mock( 'COMMAND' ) do
+          stubs( :to_str ).returns( 'COMMAND' )
+          stubs( :ss ).returns( 'SS' )
+        end
+        CommandBuilder.stubs( :build ).returns( command )
+
         @shell = mock( 'SHELL' ) do
           stubs( :on_stdout ).yields( 'OK PNG=/PATH/FILENAME.PNG' )
           stubs :on_stderr
@@ -56,8 +64,6 @@ describe Dispatcher do
           stubs :exec
         end
         Popen3::Shell.stubs( :open ).yields( @shell )
-
-        CommandBuilder.stubs( :build ).returns( 'COMMAND' )
       end
 
 

@@ -29,35 +29,61 @@ end
 
 
 task :run do
-  pool = ThreadPool.new( node_list.size )
-  make_target_dirs
-  
-  ss_all.each do | each |
-    puts "SS: #{ each }"
-    pool.dispatch( each, *parse_ss( each ) ) do | ss, s, d |
-      begin
-        telnet( s, d ) do | l |
-          case l
-          when /^FAILED/
-            raise "Queue is full"
-          when /^OK (\S+:\S+\.png)/
-            scp_png $1
+  begin
+    pool = ThreadPool.new( node_list.size )
+    make_target_dirs
+    targets = []
+
+    ss_all.each do | each |
+      puts "SS: #{ each }"
+      pool.dispatch( each, *parse_ss( each ) ) do | ss, s, d |
+        begin
+          telnet( s, d ) do | l |
+            case l
+            when /^FAILED/
+              raise "Queue is full"
+            when /^OK (\S+:\S+\.png)/
+              targets << scp_png( $1 )
+            end
           end
+        rescue
+          STDERR.puts $!.to_s
+          sleep 1
+          $stderr.puts "Retrying #{ ss } ... "
+          retry
         end
-      rescue
-        sleep 1
-        $stderr.puts "Retrying #{ ss } ... "
-        retry
       end
     end
+    pool.shutdown
+  rescue Interrupt
+    $stderr.puts "Caught Ctrl-c signal! Terminating ..."
+  ensure
+    composite_png targets
+    clean_temp_file
   end
-  pool.shutdown
 end
 
 
 task :server do
   q = Queued.new( node_list )
   q.start
+end
+
+
+################################################################################
+# Helper Functions
+################################################################################
+
+
+def clean_temp_file
+  FileUtils.rm Dir.glob( '/tmp/*.ss' ), :force => true
+end
+
+
+def composite_png targets
+  unless targets.empty?
+    system "convert -composite #{ targets.join( ' ' ) } /tmp/target.png"
+  end
 end
 
 
@@ -70,10 +96,10 @@ def parse_ss ss
   s = []
   d = []
   IO.readlines( ss ).each do | each |
-    if /^s (\d+)/=~ each.chomp
+    case each.chomp
+    when /^s (\d+)/
       s << $1        
-    end
-    if /^d (\d+)/=~ each.chomp
+    when /^d (\d+)/
       d << $1
     end
   end
@@ -85,6 +111,7 @@ def scp_png path
   target_dir = File.join( '/tmp', path.split( ':' )[ 0 ] )
   puts "SCPing #{ path } to #{ target_dir } ..."
   system "scp #{ path } #{ target_dir }"
+  File.join target_dir, File.basename( path.split( ':' )[ 1 ] )
 end
 
 
@@ -106,7 +133,9 @@ end
 def make_target_dirs
   node_list.each do | each |
     dir = File.join( '/tmp', each )
-    unless FileTest.directory?( dir )
+    if FileTest.directory?( dir )
+      FileUtils.rm Dir.glob( File.join( dir, '*.png' ) )
+    else
       FileUtils.mkdir dir
     end
   end

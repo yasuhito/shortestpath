@@ -8,7 +8,8 @@ describe CommandBuilder, 'when building a command' do
 
     command = CommandBuilder.build( 'NODE', 'GRAPH', 'SOURCE', 'DESTINATION' )
 
-    command.should == "scp SS NODE:SS && ssh NODE 'COMMAND' && ssh NODE 'rm SS'"
+    command.ss.should == 'SS'
+    command.to_str.should == "scp SS NODE:SS && ssh NODE 'COMMAND' && ssh NODE 'rm SS'"
   end
 
 

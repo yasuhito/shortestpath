@@ -2,6 +2,9 @@ require 'tempfile'
 
 
 class Job
+  attr_reader :ss
+
+
   def initialize graph, source, destination
     @source = source
     @destination = destination
@@ -12,12 +15,17 @@ class Job
 
 
   def command
-    [ sp_command, merge_command, convert_command ].join( '; ' )
+    [ sp_command, merge_command, convert_command ].join( ' && ' )
   end
 
 
-  def ss
-    @ss
+  ################################################################################
+  private
+  ################################################################################
+
+
+  def sp_command
+    "~/bin/sp.heap #{ @graph } #{ ss } #{ outp }"
   end
 
 
@@ -26,25 +34,14 @@ class Job
   end
 
 
-  def sp_command
-    "~/bin/sp.heap #{ @graph } #{ ss } #{ outp }"
-  end
-
-
   def convert_command
     "convert -transparent white #{ eps } #{ png } && echo 'OK PNG=#{ png }'"
   end
 
 
-  private
-
-
   def validate
     unless /\.m\-gr$/=~ @graph
       raise 'graph file name should have .m-gr suffix'
-    end
-    unless FileTest.exist?( @graph )
-      raise "graph file #{ @graph } does not exist!"
     end
     if @source.include?( nil )
       raise "invalid query #{ @source.inspect }"
@@ -98,7 +95,7 @@ c
 c
 #{ destination_ss.join( "\n" ) }
 SS
-    t.close
+    t.flush
 
     @tmp_path = t.path
     sspath = t.path + '.ss'
