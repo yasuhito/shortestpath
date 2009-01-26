@@ -31,7 +31,7 @@ end
 
 
 class QueueFullError < RuntimeError; end
-
+$mutex = Mutex.new
 
 task :run do
   begin
@@ -42,12 +42,13 @@ task :run do
       $log.level = Logger::INFO
     end
 
+    FileUtils.rm target_png, :force => true
+
     pool = ThreadPool.new( node_list.size, $log )
     make_target_dirs
-    targets = []
 
     ss_all.each do | each |
-      $log.info "Dispatching a query (ss=#{ each }) ..."
+      $log.info "Submitting a query (ss=#{ each }) ..."
       pool.dispatch( each, *parse_ss( each ) ) do | ss, s, d |
         begin
           telnet( s, d ) do | l |
@@ -56,7 +57,7 @@ task :run do
               raise QueueFullError, 'Queue is full'
             when /^OK \S+:\S+\.png/
               $log.info "Finished query (ss=#{ ss })"
-              targets << scp_png( l[ 3..-1 ].chomp )
+              composite_png scp_png( l[ 3..-1 ].chomp )
             end
           end
         rescue QueueFullError
@@ -79,8 +80,6 @@ task :run do
     pool.shutdown
   rescue Interrupt
     $log.info "Got Ctrl-C signal! Terminating ..."
-  ensure
-    composite_png targets
   end
 end
 
@@ -96,10 +95,21 @@ end
 ################################################################################
 
 
+def target_png
+  '/tmp/target.png'
+end
+
+
 # [TODO] 結果が出るたびに PNG を更新する
-def composite_png targets
-  unless targets.empty?
-    cmd = "convert -composite #{ targets.join( ' ' ) } /tmp/target.png"
+def composite_png png
+  $mutex.synchronize do
+    cmd = nil
+    if FileTest.exists?( target_png )
+      cmd = "cp #{ target_png } /tmp/tmp.png ; convert -composite #{ png } /tmp/tmp.png #{ target_png }"
+    else
+      cmd = "mv #{ png } #{ target_png }"
+    end
+    $log.debug cmd
     system cmd
   end
 end
