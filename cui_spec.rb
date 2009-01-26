@@ -3,44 +3,45 @@ require 'cui'
 require 'spec_helper'
 
 
+
 describe CUI do
   before :each do
-    @cui = CUI.new( [ 'NODE A', 'NODE B' ] )
     Kernel.stubs :system
+    Kernel.stubs :sleep
     STDOUT.stubs :puts
   end
 
 
-  it 'should clear terminal when updated' do
-    @cui.stubs( :update_freq_high? ).returns( false )
+  describe 'when initialized' do
+    it 'should enter the main loop and resets terminal periodically when initialized' do
+      Thread.expects( :start ).yields
+      Kernel.expects( :loop ).yields
 
-    Kernel.expects( :system ).with( 'tput clear' )
-    Kernel.expects( :system ).with( 'tput cup 0 0' )
+      Kernel.expects( :system ).with( 'tput clear' )
+      Kernel.expects( :system ).with( 'tput cup 0 0' )
 
-    @cui.update
+      cui = CUI.new( [ 'NODE A', 'NODE B' ] )
+    end
   end
 
 
-  it 'should print out node status' do
-    STDOUT.expects( :puts ).times( 2 )
+  describe 'when updated' do
+    it 'should print out node status' do
+      Thread.stubs( :start )
+      cui = CUI.new( [ 'NODE A', 'NODE B' ] )
 
-    @cui.started 'NODE A'
-    @cui.finished 'NODE A'
-    @cui.started 'NODE A'
-    @cui.failed 'NODE A'
+      STDOUT.expects( :puts ).times( 2 )
 
-    @cui.started 'NODE A'
-    @cui.finished 'NODE B'
-    @cui.started 'NODE B'
+      cui.started 'NODE A'
+      cui.finished 'NODE A'
+      cui.started 'NODE A'
+      cui.failed 'NODE A'
 
-    @cui.stubs( :update_freq_high? ).returns( false )
-    @cui.update
-  end
+      cui.started 'NODE B'
+      cui.finished 'NODE B'
+      cui.started 'NODE B'
 
-
-  it 'should raise if unknown status was set' do
-    lambda do
-      @cui.update( { 'NODE A' => [ :unknown ] } )
-    end.should raise_error
+      cui.__send__( :update )
+    end
   end
 end

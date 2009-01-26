@@ -2,12 +2,13 @@ require 'thread'
 
 
 class ThreadPool
-  def initialize max_size
+  def initialize max_size, log
     @pool = []
     @waiting = []
     @pool_mutex = Mutex.new
     @pool_cv = ConditionVariable.new
     @max_size = max_size
+    @log = log
   end
 
 
@@ -16,11 +17,11 @@ class ThreadPool
       # Wait for space in the pool
       @pool_mutex.synchronize do
         while @pool.size >= @max_size
-          $stderr.puts "Pool is full; waiting to run #{ args.first } ..."
+          @log.debug "Pool is full; waiting to run #{ args.first } ..."
           # Sleep until some other thread calls @pool_cv.signal.
           @waiting << Thread.current
           @pool_cv.wait @pool_mutex
-          $stderr.puts "Thread activated #{ args.first }"
+          @log.debug "Thread activated #{ args.first }"
           @waiting.delete Thread.current
         end
       end
@@ -29,9 +30,9 @@ class ThreadPool
         @pool << Thread.current
         yield( *args )
       rescue => e
-        STDERR.puts $!.to_str
+        @log.error $!.to_str
         $!.backtrace.each do | each |
-          STDERR.puts each
+          @log.debug each
         end
       ensure
         @pool_mutex.synchronize do

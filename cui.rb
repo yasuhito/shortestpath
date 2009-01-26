@@ -5,35 +5,12 @@ require 'color'
 class CUI
   def initialize nodes
     @node_state = {}
-    nodes.each do | each |
+    @nodes = nodes.sort
+    @nodes.each do | each |
       @node_state[ each ] = []
     end
-    @last_updated = Time.now
     @mutex = Mutex.new
-  end
-
-
-  def update
-    now = Time.now
-    return if update_freq_high?( now )
-
-    reset_terminal
-
-    @node_state.keys.sort.each do | node |
-      status = @node_state[ node ].collect do | each |
-        case each
-        when :started
-          Color.yellow '#'
-        when :finished
-          Color.slate '#'
-        when :failed
-          Color.pink '#'
-        end
-      end
-      STDOUT.puts "#{ node }: #{ status }"
-    end
-
-    @last_updated = now
+    start
   end
 
 
@@ -41,7 +18,6 @@ class CUI
     @mutex.synchronize do
       @node_state[ node ].pop
       @node_state[ node ] += [ :failed ]
-      update
     end
   end
 
@@ -49,7 +25,6 @@ class CUI
   def started node
     @mutex.synchronize do
       @node_state[ node ] += [ :started ]
-      update
     end
   end
 
@@ -58,7 +33,6 @@ class CUI
     @mutex.synchronize do
       @node_state[ node ].pop
       @node_state[ node ] += [ :finished ]
-      update
     end
   end
 
@@ -68,13 +42,38 @@ class CUI
   ################################################################################
 
 
-  def reset_terminal
-    Kernel.system 'tput clear'
-    Kernel.system 'tput cup 0 0'
+  def update
+    @mutex.synchronize do
+      reset
+      @nodes.each do | node |
+        status = @node_state[ node ].collect do | each |
+          case each
+          when :started
+            Color.yellow '#'
+          when :finished
+            Color.slate '#'
+          when :failed
+            Color.pink '#'
+          end
+        end
+        STDOUT.puts "#{ node }: #{ status }"
+      end
+    end
   end
 
 
-  def update_freq_high? now
-     now - @last_updated < 0.2
+  def start
+    Thread.start do
+      Kernel.loop do
+        Kernel.sleep 1
+        update
+      end
+    end
+  end
+
+
+  def reset
+    Kernel.system 'tput clear'
+    Kernel.system 'tput cup 0 0'
   end
 end

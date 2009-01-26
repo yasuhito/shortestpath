@@ -1,5 +1,6 @@
 require 'rubygems'
 
+require 'logger'
 require 'net/telnet'
 require 'queued'
 require 'rake/clean'
@@ -30,12 +31,15 @@ end
 
 task :run do
   begin
-    pool = ThreadPool.new( node_list.size )
+    $log = Logger.new( STDOUT )
+    $log.level = Logger::DEBUG
+
+    pool = ThreadPool.new( node_list.size, $log )
     make_target_dirs
     targets = []
 
     ss_all.each do | each |
-      puts "SS: #{ each }"
+      $log.info "Dispatching a query (ss=#{ each }) ..."
       pool.dispatch( each, *parse_ss( each ) ) do | ss, s, d |
         begin
           telnet( s, d ) do | l |
@@ -43,20 +47,24 @@ task :run do
             when /^FAILED/
               raise "Queue is full"
             when /^OK (\S+:\S+\.png)/
+              $log.info "Finished query (ss=#{ ss })"
               targets << scp_png( $1 )
             end
           end
         rescue
-          STDERR.puts $!.to_s
+          $log.error $!.to_s
+          $!.backtrace.each do | each |
+            $log.debug each
+          end
           sleep 1
-          $stderr.puts "Retrying #{ ss } ... "
+          $log.info "Retrying #{ ss } ... "
           retry
         end
       end
     end
     pool.shutdown
   rescue Interrupt
-    $stderr.puts "Caught Ctrl-c signal! Terminating ..."
+    $log.info "Got Ctrl-C signal! Terminating ..."
   ensure
     composite_png targets
     clean_temp_file
@@ -88,7 +96,13 @@ end
 
 
 def ss_all
-  Dir.glob '/tmp/count3109-3000/*.ss'
+  ss = Dir.glob( "#{ ENV[ 'SS' ] }/*.ss" )
+  if ss.empty?
+    $stderr.puts "usage: rake SS=SS_DIR run"
+    $stderr.puts "example: rake SS=/tmp/count3109/ run"
+    exit -1
+  end
+  ss
 end
 
 
@@ -109,8 +123,10 @@ end
 
 def scp_png path
   target_dir = File.join( '/tmp', path.split( ':' )[ 0 ] )
-  puts "SCPing #{ path } to #{ target_dir } ..."
-  system "scp #{ path } #{ target_dir }"
+  $log.debug "SCPing #{ path } to #{ target_dir } ..."
+  unless system( "scp -q #{ path } #{ target_dir }" )
+    raise "Failed to scp #{ path } to #{ target_dir }!"
+  end
   File.join target_dir, File.basename( path.split( ':' )[ 1 ] )
 end
 
