@@ -29,6 +29,9 @@ Spec::Rake::SpecTask.new do | t |
 end
 
 
+class QueueFullError < RuntimeError; end
+
+
 task :run do
   begin
     $log = Logger.new( STDOUT )
@@ -45,12 +48,17 @@ task :run do
           telnet( s, d ) do | l |
             case l
             when /^FAILED/
-              raise "Queue is full"
+              raise QueueFullError, 'Queue is full'
             when /^OK (\S+:\S+\.png)/
               $log.info "Finished query (ss=#{ ss })"
               targets << scp_png( $1 )
             end
           end
+        rescue QueueFullError
+          $log.error $!.to_s
+          sleep 1
+          $log.info "Retrying #{ ss } ... "
+          retry
         rescue
           $log.error $!.to_s
           $!.backtrace.each do | each |

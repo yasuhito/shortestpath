@@ -97,8 +97,8 @@ class Dispatcher
       end
 
       @cui.started node
-      @logger.log command.to_str
-      shell.exec command.to_str
+      @logger.log command
+      shell.exec command
     end
   end
 end

@@ -87,7 +87,7 @@ class Job
 
 
   def make_query_file
-    t = Tempfile.new( 'sp' )
+    t = Tempfile.new( "sp.#{ Thread.current.object_id }" )
     t.puts <<-SS
 p aux sp ss #{ source_ss.size } #{ destination_ss.size }
 c
@@ -95,7 +95,7 @@ c
 c
 #{ destination_ss.join( "\n" ) }
 SS
-    t.flush
+    t.close
 
     @tmp_path = t.path
     sspath = t.path + '.ss'

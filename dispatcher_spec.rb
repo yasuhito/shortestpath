@@ -8,7 +8,12 @@ describe Dispatcher do
     @logger = mock( 'LOGGER' ) do
       stubs :log
     end
-    STDOUT.stubs( :puts )
+    cui = mock( 'CUI' ) do
+      stubs :finished
+      stubs :failed
+      stubs :started
+    end
+    CUI.stubs( :new ).returns( cui )
     @client = mock( 'CLIENT' )
     @nodes = NodeList.new( [ 'NODE_A', 'NODE_B', 'NODE_C' ] )
     @dispatcher = Dispatcher.new( @nodes, @logger )
