@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 require 'rubygems'
 
 require 'logger'
@@ -35,7 +36,11 @@ class QueueFullError < RuntimeError; end
 task :run do
   begin
     $log = Logger.new( STDOUT )
-    $log.level = Logger::DEBUG
+    if ENV[ 'DEBUG' ]
+      $log.level = Logger::DEBUG
+    else
+      $log.level = Logger::INFO
+    end
 
     pool = ThreadPool.new( node_list.size, $log )
     make_target_dirs
@@ -49,9 +54,9 @@ task :run do
             case l
             when /^FAILED/
               raise QueueFullError, 'Queue is full'
-            when /^OK (\S+:\S+\.png)/
+            when /^OK \S+:\S+\.png/
               $log.info "Finished query (ss=#{ ss })"
-              targets << scp_png( $1 )
+              targets << scp_png( l[ 3..-1 ].chomp )
             end
           end
         rescue QueueFullError
@@ -69,13 +74,13 @@ task :run do
           retry
         end
       end
+      sleep 1
     end
     pool.shutdown
   rescue Interrupt
     $log.info "Got Ctrl-C signal! Terminating ..."
   ensure
     composite_png targets
-    clean_temp_file
   end
 end
 
@@ -91,20 +96,17 @@ end
 ################################################################################
 
 
-def clean_temp_file
-  FileUtils.rm Dir.glob( '/tmp/*.ss' ), :force => true
-end
-
-
+# [TODO] 結果が出るたびに PNG を更新する
 def composite_png targets
   unless targets.empty?
-    system "convert -composite #{ targets.join( ' ' ) } /tmp/target.png"
+    cmd = "convert -composite #{ targets.join( ' ' ) } /tmp/target.png"
+    system cmd
   end
 end
 
 
 def ss_all
-  ss = Dir.glob( "#{ ENV[ 'SS' ] }/*.ss" )
+  ss = Dir.glob( File.join( ENV[ 'SS' ], '*.ss' ) )
   if ss.empty?
     $stderr.puts "usage: rake SS=SS_DIR run"
     $stderr.puts "example: rake SS=/tmp/count3109/ run"

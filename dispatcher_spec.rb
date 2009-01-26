@@ -6,7 +6,8 @@ require 'spec_helper'
 describe Dispatcher do
   before :each do
     @logger = mock( 'LOGGER' ) do
-      stubs :log
+      stubs :info
+      stubs :error
     end
     cui = mock( 'CUI' ) do
       stubs :finished
@@ -75,7 +76,7 @@ describe Dispatcher do
       it 'should log stderr' do
         @shell.stubs( :on_stderr ).yields( 'STDERR' )
         
-        @logger.expects( :log ).with( 'STDERR' )
+        @logger.expects( :info ).with( 'STDERR' )
         
         @dispatcher.dispatch @client, 'USA-t.m-gr', [ 957498 ], [ 957498, 19200797 ]
       end

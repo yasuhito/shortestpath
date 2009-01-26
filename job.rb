@@ -19,6 +19,11 @@ class Job
   end
 
 
+  def eps
+    @tmp_path + '.eps'
+  end
+
+
   ################################################################################
   private
   ################################################################################
@@ -57,11 +62,6 @@ class Job
   end
 
 
-  def eps
-    @tmp_path + '.eps'
-  end
-
-
   def outp
     @tmp_path + '.out-p'
   end
@@ -87,7 +87,7 @@ class Job
 
 
   def make_query_file
-    t = Tempfile.new( "sp.#{ Thread.current.object_id }" )
+    t = Tempfile.new( "sp.#{ object_id }" )
     t.puts <<-SS
 p aux sp ss #{ source_ss.size } #{ destination_ss.size }
 c

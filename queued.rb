@@ -1,35 +1,15 @@
 # -*- coding: utf-8 -*-
 require 'dispatcher'
+require 'logger'
 
 
 class Queued
-  class Logger
-    PATH = '/tmp/queued.log'
-
-
-    def initialize
-      @log = File.open( PATH, 'w' )
-    end
-
-
-    def log message
-      @log.puts "#{ Time.now }: #{ message }"
-      @log.flush
-    end
-
-
-    def log_and_msg message
-      log message
-      STDOUT.puts message
-    end
-  end
-
-
   PORT = 7838
+  LOG_PATH = '/tmp/queued.log'
 
 
   def initialize node_list
-    @logger = Logger.new
+    @logger = Logger.new( LOG_PATH )
     @dispatcher = Dispatcher.new( NodeList.new( node_list ), @logger )
     STDOUT.puts "#{ node_list.size } nodes: (#{ node_list.join( ', ' )})"
   end
@@ -37,7 +17,7 @@ class Queued
 
   def start
     socket = open_socket
-    @logger.log_and_msg "Queued started on #{ socket.addr[ 2 ] }, port = #{ PORT }"
+    STDOUT.puts "Queued started port = #{ PORT }"
 
     Kernel.loop do
       Thread.start( socket.accept ) do | client |
@@ -62,7 +42,7 @@ class Queued
           exit 0
         else # FAILED
           msg = "FAILED Invalid request '#{ command }'"
-          @logger.log_and_msg msg
+          @logger.error msg
           client.puts msg
           client.close
         end
@@ -80,9 +60,9 @@ class Queued
     begin
       socket = TCPServer.open( PORT )
     rescue
-      @logger.log $!.to_s
+      @logger.error $!.to_s
       $!.backtrace.each do | each |
-        @logger.log each
+        @logger.debug each
       end
       exit -1
     end

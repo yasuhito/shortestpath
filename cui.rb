@@ -5,6 +5,7 @@ require 'color'
 class CUI
   def initialize nodes
     @node_state = {}
+    @last_node_state = {}
     @nodes = nodes.sort
     @nodes.each do | each |
       @node_state[ each ] = []
@@ -44,6 +45,9 @@ class CUI
 
   def update
     @mutex.synchronize do
+      return unless status_changed?
+
+      @last_node_state = @node_state.dup
       reset
       @nodes.each do | node |
         status = @node_state[ node ].collect do | each |
@@ -59,6 +63,11 @@ class CUI
         STDOUT.puts "#{ node }: #{ status }"
       end
     end
+  end
+
+
+  def status_changed?
+    @last_node_state != @node_state
   end
 
 

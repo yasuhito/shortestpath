@@ -39,25 +39,25 @@ class Dispatcher
 
   def failed client, message = nil
     msg = message ? "FAILED #{ message }" : 'FAILED'
-    @logger.log msg
+    @logger.info msg
     client.puts msg
   end
 
 
   def ok client, message = nil
     msg = message ? "OK #{ message }" : 'OK'
-    @logger.log msg
+    @logger.info msg
     client.puts msg
   end
 
 
   def settle_invalid_request client, node
-    @logger.log $!.to_s
+    @logger.error $!.to_s
     failed client, 'Invalid request'
     @nodes.deallocate_from client
     client.close
     $!.backtrace.each do | each |
-      @logger.log each
+      @logger.error each
     end
   end
 
@@ -75,11 +75,14 @@ class Dispatcher
       end
 
       shell.on_stdout do | line |
-        ( /\AOK PNG=(.+)/=~ line ) ? png = $1 : @logger.log( line )
+        if /\AOK PNG=.+/=~ line
+          png = line[ 7..-1 ].chomp
+        end
+        @logger.info( line )
       end
 
       shell.on_stderr do | line |
-        @logger.log line
+        @logger.info line
       end
 
       shell.on_success do
@@ -97,7 +100,7 @@ class Dispatcher
       end
 
       @cui.started node
-      @logger.log command
+      @logger.info command
       shell.exec command
     end
   end

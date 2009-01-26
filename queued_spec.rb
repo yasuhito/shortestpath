@@ -11,15 +11,16 @@ describe Queued do
     @dispatcher = mock( 'DISPATCHER' )
     Dispatcher.stubs( :new ).returns( @dispatcher )
 
+    dummy_log = mock( 'LOG' ) do
+      stubs :info
+      stubs :error
+      stubs :debug
+    end
+    Logger.stubs( :new ).with( Queued::LOG_PATH ).returns( dummy_log )
+
     @queued = Queued.new( [ 'ec2-72-44-39-169.compute-1.amazonaws.com',
                             'ec2-75-101-252-236.compute-1.amazonaws.com',
                             'ec2-174-129-148-3.compute-1.amazonaws.com' ] )
-
-    dummy_log = mock( 'LOG' ) do
-      stubs :puts
-      stubs :flush
-    end
-    File.stubs( :open ).with( Queued::Logger::PATH, 'w' ).returns( dummy_log )
   end
 
 
