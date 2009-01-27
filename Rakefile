@@ -5,6 +5,7 @@ require 'logger'
 require 'net/telnet'
 require 'queued'
 require 'rake/clean'
+require 'sp-config'
 require 'spec'
 require 'spec/rake/spectask'
 require 'spec/rake/verify_rcov'
@@ -96,16 +97,25 @@ end
 
 
 def target_png
-  '/tmp/target.png'
+  File.expand_path SPConfig[ 'target' ]
 end
 
 
-# [TODO] 結果が出るたびに PNG を更新する
+def temp_target_png
+  File.expand_path File.join( SPConfig[ 'working_dir' ], 'temp.png' )
+end
+
+
+def graph
+  File.expand_path SPConfig[ 'graph' ]
+end
+
+
 def composite_png png
   $mutex.synchronize do
     cmd = nil
     if FileTest.exists?( target_png )
-      cmd = "cp #{ target_png } /tmp/tmp.png ; convert -composite #{ png } /tmp/tmp.png #{ target_png }"
+      cmd = "cp #{ target_png } #{ temp_target_png }; convert -composite #{ png } #{ temp_target_png } #{ target_png }"
     else
       cmd = "mv #{ png } #{ target_png }"
     end
@@ -142,7 +152,7 @@ end
 
 
 def scp_png path
-  target_dir = File.join( '/tmp', path.split( ':' )[ 0 ] )
+  target_dir = File.join( SPConfig[ 'working_dir' ], path.split( ':' )[ 0 ] )
   $log.debug "SCPing #{ path } to #{ target_dir } ..."
   unless system( "scp -q #{ path } #{ target_dir }" )
     raise "Failed to scp #{ path } to #{ target_dir }!"
@@ -160,7 +170,7 @@ end
 
 def telnet s, d, &block
   telnet = Net::Telnet.new( 'Host' => 'localhost', 'Port' => 7838, 'Timeout' => 10000 )
-  telnet.cmd "dispatch /home/yasuhito/USA-t.m-gr #{ s.size } #{ d.size } #{ s.join( ' ' ) } #{ d.join( ' ' ) }" do | line |
+  telnet.cmd "dispatch #{ SPConfig[ 'graph' ] } #{ s.size } #{ d.size } #{ s.join( ' ' ) } #{ d.join( ' ' ) }" do | line |
     block.call line
   end
 end
@@ -168,7 +178,7 @@ end
 
 def make_target_dirs
   node_list.each do | each |
-    dir = File.join( '/tmp', each )
+    dir = File.expand_path( File.join( SPConfig[ 'working_dir' ], each ) )
     if FileTest.directory?( dir )
       FileUtils.rm Dir.glob( File.join( dir, '*.png' ) )
     else

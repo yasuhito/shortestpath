@@ -1,3 +1,4 @@
+require 'sp-config'
 require 'tempfile'
 
 
@@ -30,12 +31,12 @@ class Job
 
 
   def sp_command
-    "~/bin/sp.heap #{ @graph } #{ ss } #{ outp }"
+    "#{ SPConfig[ 'sp.heap' ] } #{ @graph } #{ ss } #{ outp }"
   end
 
 
   def merge_command
-    "~/bin/merge_ssout #{ @graph } #{ graph_co } #{ ss } #{ outp } #{ eps }"
+    "#{ SPConfig[ 'merge_ssout' ] } #{ @graph } #{ graph_co } #{ ss } #{ outp } #{ eps }"
   end
 
 
@@ -87,7 +88,7 @@ class Job
 
 
   def make_query_file
-    t = Tempfile.new( "sp.#{ object_id }" )
+    t = Tempfile.new( "sp.#{ object_id }", File.expand_path( SPConfig[ 'working_dir' ] ) )
     t.puts <<-SS
 p aux sp ss #{ source_ss.size } #{ destination_ss.size }
 c

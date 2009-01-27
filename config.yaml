@@ -1,0 +1,5 @@
+sp.heap: ~/bin/sp.heap
+merge_ssout: ~/bin/merge_ssout
+working_dir: /tmp
+target: ~/sp/target.png
+graph: ~/USA-t.m-gr
