@@ -7,6 +7,11 @@ class SPConfig
 
   def self.[] key
     config = YAML::load( IO.read( PATH ) )
-    config[ key ]
+    case key
+    when 'working_dir'
+      File.expand_path config[ key ]
+    else
+      config[ key ]
+    end
   end
 end
