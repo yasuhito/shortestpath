@@ -10,6 +10,7 @@ describe Dispatcher do
       stubs :error
     end
     cui = mock( 'CUI' ) do
+      stubs :start
       stubs :finished
       stubs :failed
       stubs :started

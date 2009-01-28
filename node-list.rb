@@ -26,7 +26,12 @@ class NodeList
     @mutex.synchronize do
       node = @allocation[ client ]
       @nodes << node
-      @clients -= [ client ]
+      @clients.each_with_index do | each, i |
+        if each == client
+          @clients.delete_at i
+          break
+        end
+      end
       @allocation.delete client
       node
     end

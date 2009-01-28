@@ -13,6 +13,7 @@ class Dispatcher
     @nodes = nodes
     @logger = logger
     @cui = CUI.new( @nodes.to_ary )
+    @cui.start
   end
 
 

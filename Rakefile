@@ -76,7 +76,7 @@ task :run do
           retry
         end
       end
-      sleep 1
+      sleep 0.1
     end
     pool.shutdown
   rescue Interrupt
@@ -177,7 +177,7 @@ end
 
 
 def make_target_dirs
-  node_list.each do | each |
+  node_list.uniq.each do | each |
     dir = File.expand_path( File.join( SPConfig[ 'working_dir' ], each ) )
     if FileTest.directory?( dir )
       FileUtils.rm Dir.glob( File.join( dir, '*.png' ) )

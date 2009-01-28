@@ -6,19 +6,33 @@ class CUI
   def initialize nodes
     @node_state = {}
     @last_node_state = {}
-    @nodes = nodes.sort
+    @nodes = nodes.sort.uniq
     @nodes.each do | each |
       @node_state[ each ] = []
     end
     @mutex = Mutex.new
-    start
+  end
+
+
+  def start
+    Thread.start do
+      Kernel.loop do
+        Kernel.sleep 1
+        update
+      end
+    end
   end
 
 
   def failed node
     @mutex.synchronize do
-      @node_state[ node ].pop
-      @node_state[ node ] += [ :failed ]
+      @node_state[ node ].each_with_index do | each, index |
+        if each == :started
+          @node_state[ node ][ index ] = :failed
+          return
+        end
+      end
+      raise "We shouldn't reach here!"
     end
   end
 
@@ -32,8 +46,13 @@ class CUI
 
   def finished node
     @mutex.synchronize do
-      @node_state[ node ].pop
-      @node_state[ node ] += [ :finished ]
+      @node_state[ node ].each_with_index do | each, index |
+        if each == :started
+          @node_state[ node ][ index ] = :finished
+          return
+        end
+      end
+      raise "We shouldn't reach here!"
     end
   end
 
@@ -68,16 +87,6 @@ class CUI
 
   def status_changed?
     @last_node_state != @node_state
-  end
-
-
-  def start
-    Thread.start do
-      Kernel.loop do
-        Kernel.sleep 1
-        update
-      end
-    end
   end
 
 
