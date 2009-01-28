@@ -1,0 +1,35 @@
+最短路ソルバー用 キューイングシステム
+
+
+* 実行の方法
+  まずはサーバーを実行しておき、次にクライアントを実行します。
+
+  # サーバの実行
+  % rake server
+
+  # クライアントの実行
+  % rake run  
+
+
+* ノードの設定
+  node_list.txt というファイルを作成し、ジョブ投入先のノードをリストアッ
+  プします。  
+
+  sdpa01.indsys.chuo-u.ac.jp
+  sdpa02.indsys.chuo-u.ac.jp
+  sdpa03.indsys.chuo-u.ac.jp
+            ...
+  sdpa16.indsys.chuo-u.ac.jp
+
+
+* プログラム実行方法の設定
+  config.yaml というファイルを作成し、最短路ソルバーのパスなどを設定し
+  ます。
+
+  sp.heap: ~/bin/sp.heap
+  merge_ssout: ~/bin/merge_ssout
+  working_dir: /tmp
+  target: ~/sp/target.png
+  graph: ~/USA-t.m-gr
+
+
