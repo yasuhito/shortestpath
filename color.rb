@@ -8,18 +8,18 @@ class Color
   RESET = "[0m"
 
 
-  def self.slate str
-    SLATE + str + RESET
+  def self.slate string
+    SLATE + string + RESET
   end
 
 
-  def self.yellow str
-    YELLOW + str + RESET
+  def self.yellow string
+    YELLOW + string + RESET
   end
 
 
-  def self.pink str
-    PINK + str + RESET
+  def self.pink string
+    PINK + string + RESET
   end
 end
 
