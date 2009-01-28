@@ -7,7 +7,7 @@ describe CommandBuilder, 'when building a command' do
     Job.expects( :new ).with( 'GRAPH', 'SOURCE', 'DESTINATION' ).returns job_mock
 
     command = CommandBuilder.build( 'NODE', 'GRAPH', 'SOURCE', 'DESTINATION' )
-    command.should == "scp SS NODE:SS && ssh NODE 'COMMAND' && ssh NODE 'rm SS; rm EPS'"
+    command.should == "scp SS NODE:SS && ssh NODE 'COMMAND' && ssh NODE 'rm SS EPS OUT-P'"
   end
 
 
@@ -16,6 +16,7 @@ describe CommandBuilder, 'when building a command' do
       stubs( :command ).returns 'COMMAND'
       stubs( :eps ).returns 'EPS'
       stubs( :ss ).returns 'SS'
+      stubs( :out_p ).returns 'OUT-P'
     end
   end
 end

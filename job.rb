@@ -26,6 +26,11 @@ class Job
   end
 
 
+  def out_p
+    @tmp_basename + '.out-p'
+  end
+
+
   ################################################################################
   private
   ################################################################################
@@ -61,11 +66,6 @@ class Job
 
   def png
     @tmp_basename + '.png'
-  end
-
-
-  def out_p
-    @tmp_basename + '.out-p'
   end
 
 
