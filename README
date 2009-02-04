@@ -31,5 +31,7 @@
   working_dir: /tmp
   target: ~/sp/target.png
   graph: ~/USA-t.m-gr
+  log_file: /tmp/sp.log
+  ss: /tmp/queries/
 
 

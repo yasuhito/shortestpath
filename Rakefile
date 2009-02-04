@@ -125,13 +125,20 @@ def composite_png png
 end
 
 
+def usage_and_exit
+  $stderr.puts "usage: rake SS=SS_DIR run"
+  $stderr.puts "example: rake SS=/tmp/count3109/ run"
+  exit -1
+end
+
+
 def ss_all
-  ss = Dir.glob( File.join( ENV[ 'SS' ], '*.ss' ) )
-  if ss.empty?
-    $stderr.puts "usage: rake SS=SS_DIR run"
-    $stderr.puts "example: rake SS=/tmp/count3109/ run"
-    exit -1
-  end
+  ss_dir = ENV[ 'SS' ] || SPConfig[ 'ss' ]
+  usage_and_exit if ss_dir.nil?
+
+  ss = Dir.glob( File.join( ss_dir, '*.ss' ) )
+  usage_and_exit if ss.empty?
+
   ss
 end
 
