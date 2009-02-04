@@ -5,7 +5,7 @@ require 'logger'
 
 class Queued
   PORT = 7838
-  LOG_PATH = '/tmp/queued.log'
+  LOG_PATH = SPConfig[ 'log_file' ] || '/tmp/queued.log'
 
 
   def initialize node_list

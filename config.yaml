@@ -3,3 +3,4 @@ merge_ssout: ~/bin/merge_ssout
 working_dir: /tmp
 target: ~/sp/target.png
 graph: ~/USA-t.m-gr
+log_file: /tmp/queued.log
